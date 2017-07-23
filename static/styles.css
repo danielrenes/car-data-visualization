@@ -1,0 +1,29 @@
+header {
+  padding: 20px;
+  text-align: center;
+}
+
+span.icon {
+  color: black;
+  cursor: pointer;
+}
+
+#user_data {
+  margin-left: auto;
+  margin-right: auto;
+  min-width: 600px;
+  max-width: 1200px;
+}
+
+.mod_popup {
+  position: absolute;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 500ms ease-in-out;
+}
+
+.chartjs-hidden-iframe {
+  position: relative;
+  height: auto;
+  width: auto;
+}

@@ -1,0 +1,28 @@
+<div class="loaded_content">
+  <div class="charts_wrap">
+    <div class="column" style="width: {{ charts[0]['canvas']['width'] }}; display: inline-block">
+      {% for i in range(0, charts|length if charts|length == 1 else 2) %}
+        <canvas id="{{ charts[i]['canvas']['id'] }}" width="{{ charts[i]['canvas']['width'] }}" height="{{ charts[i]['canvas']['height'] }}"
+          style="display: inline; margin-bottom: 20px">
+        </canvas>
+      {% endfor %}
+    </div>
+
+    {% if charts|length == 4 %}
+      <div class="column" style="width: {{ charts[0]['canvas']['width'] }}; display: inline-block">
+        {% for i in range(2, 4) %}
+          <canvas id="{{ charts[i]['canvas']['id'] }}" width="{{ charts[i]['canvas']['width'] }}" height="{{ charts[i]['canvas']['height'] }}"
+            style="display: inline; margin-bottom: 20px">
+          </canvas>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% for chart in charts %}
+      <script>
+        var {{ chart['context'] }} = document.getElementById("{{ chart['canvas']['id'] }}").getContext("2d");
+        var {{ chart['canvas']['id'] }} = new Chart({{ chart['context'] }}, {{ chart['chart'] }});
+      </script>
+    {% endfor %}
+  </div>
+</div>

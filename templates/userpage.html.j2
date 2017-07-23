@@ -1,0 +1,45 @@
+{% extends "layout.html.j2" %}
+{% block title %}{{ username }}{% endblock %}
+{% block tabs %}
+  <div class="tabs is-centered is-medium is-boxed is-fullwidth is-toggle">
+    <ul>
+      <li class="is-active"><a href="#">Info</a></li>
+      <li><a href="#" id="categories_tab">Categories</a></li>
+      <li><a href="#" id="sensors_tab">Sensors</a></li>
+      <li><a href="#" id="views_tab">Views</a></li>
+    </ul>
+  </div>
+{% endblock %}
+{% block content %}
+  <div id="user_data">
+  </div>
+  <div class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Modal title</p>
+        <button class="delete"></button>
+      </header>
+      <section class="modal-card-body">
+      </section>
+      <footer class="modal-card-foot">
+        <button class="button is-success">Save changes</button>
+        <a class="button">Cancel</a>
+      </footer>
+    </div>
+  </div>
+  <div class="mod_popup">
+    <span class="icon play">
+      <i class="fa fa-play"></i>
+    </span>
+    <span class="icon add">
+      <i class="fa fa-plus-square"></i>
+    </span>
+    <span class="icon edit">
+      <i class="fa fa-pencil-square-o"></i>
+    </span>
+    <span class="icon remove">
+      <i class="fa fa-minus-square"></i>
+    </span>
+  </div>
+{% endblock %}

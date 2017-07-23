@@ -1,0 +1,36 @@
+<html>
+
+  <head>
+    <title>{% block title %}{% endblock %} - Data Visualization</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.4.3/css/bulma.min.css"></link>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"></link>
+    <script
+			  src="https://code.jquery.com/jquery-3.2.1.min.js"
+			  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+			  crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"></link>
+    <script type="text/javascript" src="{{ url_for('static', filename='functions.js') }}"></script>
+    <script type=text/javascript>
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+  </head>
+
+  <body>
+    <header class="block">
+      <!-- logo  -->
+      <h2 class="title is-2"><strong>Data Visualization</strong></h2>
+      <!-- show login fields or settings based on flask-login current_user.is_authenticated -->
+    </header>
+    {% block tabs %}{% endblock %}
+    <div class="block content_wrap">
+      {% block content %}{% endblock %}
+    </div>
+    <footer>
+      {% block message %}{% endblock %}
+    </footer>
+  </body>
+
+</html>
