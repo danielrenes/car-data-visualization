@@ -342,7 +342,7 @@ class SubviewForm(FlaskForm):
     view_id = HiddenField('View')
     sensor_name = QuerySelectField('Sensor', \
         query_factory=lambda: all_sensors().order_by(Sensor.id).all(), \
-        allow_blank=True, blank_text='Select a category')
+        allow_blank=True, blank_text='Select a sensor')
     chartconfig_type = QuerySelectField('Chart type', \
         query_factory=lambda: all_chartconfigs().order_by(ChartConfig.id).all(), \
         allow_blank=True, blank_text='Select a chart type')
