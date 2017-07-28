@@ -3,8 +3,6 @@
 import subprocess
 import sys
 
-import click
-
 from data_visualization import create_app, db
 from data_visualization.queries import create_chartconfigs
 

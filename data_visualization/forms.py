@@ -3,7 +3,8 @@ from wtforms import StringField, IntegerField, HiddenField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Required, Optional, Length, IPAddress, NumberRange, AnyOf
 
-from .queries import *
+from .models import Category, Sensor, ChartConfig
+from .queries import all_categories, all_sensors, all_chartconfigs
 
 class CategoryForm(FlaskForm):
     name = StringField('Name', validators=[Required(), Length(min=4, max=20)])

@@ -2,9 +2,9 @@ from flask import Blueprint, render_template, redirect, url_for, jsonify, abort
 from sqlalchemy.exc import IntegrityError
 
 from .. import db
-from ..models import *
-from ..queries import *
-from ..forms import *
+from ..models import Category, Sensor, Subview, View, ChartConfig
+from ..queries import all_categories, all_sensors, all_subviews, all_views, all_chartconfigs
+from ..forms import CategoryForm, SensorForm, SubviewForm, ViewForm
 
 forms = Blueprint('forms', __name__)
 

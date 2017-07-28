@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import unittest
 import json
 
@@ -699,6 +697,3 @@ class Tests(unittest.TestCase):
         # check if the set valid datas after the invalid ones are accepted
         rv = self.client.post(path='/forms/views/edit/{0}'.format(view_id), data=json.dumps(view), headers=self.get_headers())
         self.assertEqual(rv.status_code, 302)
-
-if __name__ == '__main__':
-    unittest.main()

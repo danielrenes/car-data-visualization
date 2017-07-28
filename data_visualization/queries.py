@@ -1,5 +1,6 @@
-from chartjs import chart_types
-from .models import *
+from . import db
+from .chartjs import chart_types
+from .models import Category, Sensor, Data, Subview, View, ChartConfig
 
 def all_categories():
     return Category.query
