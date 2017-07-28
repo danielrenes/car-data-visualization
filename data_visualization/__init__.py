@@ -17,15 +17,15 @@ def create_app(config=None):
 
     db.init_app(app)
 
-    from .data_visualization import main as main_blueprint
+    from .main_blueprint import main as main_blueprint
 
     app.register_blueprint(main_blueprint)
 
-    from .data_visualization import forms as forms_blueprint
+    from .forms_blueprint import forms as forms_blueprint
 
     app.register_blueprint(forms_blueprint)
 
-    from .data_visualization import api as api_blueprint
+    from .api_blueprint import api as api_blueprint
 
     app.register_blueprint(api_blueprint)
 

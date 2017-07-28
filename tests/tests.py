@@ -543,7 +543,7 @@ class Tests(unittest.TestCase):
             'ipv4_addr': '192.168.0.2'
         }
         rv = self.client.post(path='/forms/sensors/add', data=json.dumps(sensor), headers=self.get_headers())
-        self.assertEqual(rv.status_code, 302)   # 200, sensor is not added ???
+        self.assertEqual(rv.status_code, 302)
         rv = self.client.get(path='/sensors', headers=self.get_headers())
         data = json.loads(rv.get_data())['sensors']
         self.assertEqual(len(data), 1)
