@@ -213,7 +213,21 @@ class VirtualAdmin(object):
         conn.getresponse()
         conn.close()
 
+def ping():
+    conn = httplib.HTTPConnection(host='localhost', port=5000)
+    try:
+        conn.request('HEAD', '')
+    except IOError:
+        conn.close()
+        return False
+    is_available = conn.getresponse().status == 200
+    conn.close()
+    return is_available
+
 if __name__ == '__main__':
+    while not ping():
+        time.sleep(1)
+
     sensor_threads = []
 
     for sensor in sensors:

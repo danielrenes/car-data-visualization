@@ -3,19 +3,23 @@
 import unittest
 import json
 
-from app import *
+from data_visualization import create_app, db
+from data_visualization.queries import create_chartconfigs
 
 class Tests(unittest.TestCase):
     def setUp(self):
-        app.config['TESTING'] = True
-        app.config['WTF_CSRF_ENABLED'] = False
+        self.app = create_app()
+        self.app.config['TESTING'] = True
+        self.app.config['WTF_CSRF_ENABLED'] = False
+        self.ctx = self.app.app_context()
+        self.ctx.push()
         db.drop_all()
         db.create_all()
-        self.client = app.test_client()
+        self.client = self.app.test_client()
 
     def tearDown(self):
-        db.session.remove()
         db.drop_all()
+        self.ctx.pop()
 
     def get_headers(self):
         return {
@@ -290,7 +294,9 @@ class Tests(unittest.TestCase):
         # fetch all chartconfigs
         rv = self.client.get('/chartconfigs', headers=self.get_headers())
         data = json.loads(rv.get_data())['chartconfigs']
-        from chartjs import chart_types
+
+        from data_visualization.chartjs import chart_types
+
         self.assertEqual(len(data), len(chart_types))
         for i in xrange(len(data)):
             self.assertTrue(data[i]['type'], chart_types[i])
