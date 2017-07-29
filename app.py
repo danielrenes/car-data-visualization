@@ -31,4 +31,4 @@ def run_with_datafactory():
 def tests():
     import unittest
     tests = unittest.TestLoader().discover('tests')
-    ok = unittest.TextTestRunner(verbosity=2).run(tests).wasSuccessful()
+    unittest.TextTestRunner(verbosity=2).run(tests)
