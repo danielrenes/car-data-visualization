@@ -7,7 +7,7 @@ db = SQLAlchemy()
 
 from . import models
 
-def create_app(config=None):
+def create_app():
     app = Flask(__name__)
 
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') if 'SECRET_KEY' in os.environ else 'secret'
