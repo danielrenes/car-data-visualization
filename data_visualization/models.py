@@ -98,7 +98,7 @@ class Sensor(db.Model):
         return self.name
 
 class Data(db.Model):
-    __tablename__ = 'data-points'
+    __tablename__ = 'datas'
 
     id = db.Column(db.Integer, primary_key=True)
 

@@ -9,15 +9,12 @@ class Tests(unittest.TestCase):
         self.app = create_app()
         self.app.config['TESTING'] = True
         self.app.config['WTF_CSRF_ENABLED'] = False
-        self.ctx = self.app.app_context()
-        self.ctx.push()
         db.drop_all()
         db.create_all()
         self.client = self.app.test_client()
 
     def tearDown(self):
         db.drop_all()
-        self.ctx.pop()
 
     def get_headers(self):
         return {

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import subprocess
+import unittest
 
 from data_visualization import create_app, db
 from data_visualization.queries import create_chartconfigs
@@ -28,4 +29,5 @@ def run_with_datafactory():
 
 @app.cli.command('tests', help='Run unittests')
 def tests():
-    tests = subprocess.call(['python', '-c', 'import tests; tests.run()'])
+    tests = unittest.TestLoader().discover('tests')
+    ok = unittest.TextTestRunner(verbosity=2).run(tests).wasSuccessful()
