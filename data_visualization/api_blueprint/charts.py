@@ -1,8 +1,9 @@
-from flask import render_template, jsonify, request
+from flask import render_template, jsonify, abort, request
 
 from . import api
 from .. import chartjs
 from ..models import Category, ChartConfig, Sensor, View
+from ..queries import all_categories, all_chartconfigs, all_sensors, all_views
 
 @api.route('/charts/<view_id>', methods=['GET'])
 def get_charts_skeleton(view_id):

@@ -24,7 +24,7 @@ sensors = [
     {
         'name':       'virttemp1',
         'category':   'temp',
-        'min_value':  -30,
+        'min_value':  -10,
         'max_value':  40,
         'interval':   20
     },
@@ -227,6 +227,7 @@ def ping():
 if __name__ == '__main__':
     while not ping():
         time.sleep(1)
+    time.sleep(1)
 
     sensor_threads = []
 

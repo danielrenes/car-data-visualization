@@ -3,17 +3,16 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
+from config import config
+
 db = SQLAlchemy()
 
 from . import models
 
-def create_app():
+def create_app(config_name):
     app = Flask(__name__)
 
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') if 'SECRET_KEY' in os.environ else 'secret'
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI') if 'DATABASE_URI' in os.environ else 'sqlite://'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['WTF_CSRF_ENABLED'] = True
+    app.config.from_object(config[config_name])
 
     db.init_app(app)
 
