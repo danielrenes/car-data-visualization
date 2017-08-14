@@ -1,2 +1,25 @@
 {% extends "layout.html.j2" %}
 {% block title %}Welcome{% endblock %}
+{% block not_authenticated_user %}
+  <div class="login_form_wrap">
+    {{ login_form }}
+  </div>
+{% endblock %}
+{% block content %}
+<div class="tile is-ancestor">
+  <div class="tile is-parent is-vertical is-8">
+    <div class="tile is-child notification is-success">
+      <p class="subtitle">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec eleifend nisi. Proin sed luctus urna, ac varius leo. Aliquam sed vehicula urna, ut viverra lorem. Donec id tellus iaculis, efficitur enim sed, viverra nibh. Nunc facilisis mauris gravida, laoreet neque vel, blandit nisi. Proin eu arcu arcu. Curabitur ac quam libero. Mauris porta consectetur est, sed feugiat risus facilisis ac. Nullam suscipit ligula neque, et blandit purus bibendum vel. In interdum nisi id augue fringilla, sed facilisis magna finibus. Suspendisse commodo justo vehicula, ultrices massa at, malesuada turpis. Aenean tempor vitae risus et rhoncus. Etiam sit amet ultrices sem, a varius est. Nullam dapibus pellentesque malesuada. Sed posuere rhoncus ullamcorper. Suspendisse laoreet purus risus, sit amet ullamcorper massa semper at. Etiam consequat bibendum semper. Mauris quis leo in nibh faucibus mollis. Aliquam at magna et purus semper cursus. </p>
+    </div>
+  </div>
+  <div class="tile is-parent is-vertical is-4">
+    <div class="tile is-child notification is-light">
+      {% if not current_user.is_authenticated %}
+        <div class="signup_form_wrap">
+          {{ signup_form }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -2,17 +2,17 @@
 
 <div class="loaded_content">
   <form id="form" method="post" action="{{ url }}">
-    <div class="field">
       {{ form.hidden_tag() }}
       {% for field in form %}
-        {% if field.widget.input_type != 'hidden' %}
-          {{ field.label(class='label') }}
-          <p class="control">
-            {{ field(class='input', type='text') }}
-          </p>
-        {% endif %}
+        <div class="field">
+          {% if field.widget.input_type != 'hidden' %}
+            {{ field.label(class='label') }}
+            <p class="control">
+              {{ field(class='input', type='text') }}
+            </p>
+          {% endif %}
+        </div>
       {% endfor %}
-    </div>
   </form>
 </div>
 

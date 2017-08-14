@@ -1,3 +1,6 @@
+var user_links = {};
+get_user_links();
+
 var active_tab_from_cookie = get_cookie("active_tab");
 var active_breadcrumb_from_cookie = get_cookie("active_breadcrumb");
 

@@ -45,13 +45,13 @@ def remove_sensor(id):
     except IntegrityError:
         db.session.rollback()
         abort(400)
-    resp = jsonify('')
-    resp.status_code = 204
-    return resp
+    return '', 204
 
 @api.route('/sensor/<id>', methods=['PUT'])
 def modify_sensor(id):
     sen = all_sensors().filter(Sensor.id==id).first()
+    if sen is None:
+        abort(400)
     for key, value in json.loads(request.data).iteritems():
         if key is not 'id':
             setattr(sen, key, value)

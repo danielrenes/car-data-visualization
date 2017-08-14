@@ -45,13 +45,13 @@ def remove_category(id):
     except IntegrityError:
         db.session.rollback()
         abort(400)
-    resp = jsonify('')
-    resp.status_code = 204
-    return resp
+    return '', 204
 
 @api.route('/category/<id>', methods=['PUT'])
 def modify_category(id):
     categ = all_categories().filter(Category.id==id).first()
+    if categ is None:
+        abort(400)
     for key, value in json.loads(request.data).iteritems():
         if key is not 'id':
             setattr(categ, key, value)

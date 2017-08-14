@@ -5,11 +5,89 @@ from data_visualization.queries import create_chartconfigs
 from tests import BaseTest
 
 class ApiTest(BaseTest):
+    def test_user(self):
+        # create user
+        users = self.get_users()
+        locations = []
+
+        for user in users:
+            rv = self.client.post(path='/user', data=json.dumps(user), headers=self.get_headers())
+            self.assertEqual(rv.status_code, 201)
+            locations.append(rv.headers['Location'])
+
+        # try to register users[0] once more
+        rv = self.client.post(path='/user', data=json.dumps(users[0]), headers=self.get_headers())
+        self.assertEqual(rv.status_code, 400)
+
+        # create categories
+        categories_for_user = {}
+        categories = self.get_categories()
+        for category in categories:
+            rv = self.client.post('/category', data=json.dumps(category), headers=self.get_headers())
+            categories_for_user[str(category['user_id'])] = rv.headers['Location']
+
+        # check the returned 'Location' links
+        for i in xrange(len(locations)):
+            rv = self.client.get(path=locations[i], headers=self.get_headers())
+            data = json.loads(rv.get_data())
+            self.assertEqual(data['username'], users[i]['username'])
+            self.assertTrue('email' not in data)
+            self.assertTrue('password' not in data)
+            self.assertEqual(len(data['links']['categories']), len(categories_for_user[str(i+1)]))
+            for j in xrange(len(categories_for_user[str(i+1)])):
+                self.assertEqual('/'.join(data['links']['categories'][j].split('/')[-2:]), '/'.join(categories_for_user[str(i+1)][j].split('/')[-2:]))
+
+        # try to get a non-existing user
+        invalid_location = '/'.join(locations[0].split('/')[:-1]) + '/3'
+        rv = self.client.get(path=invalid_location, headers=self.get_headers())
+        self.assertEqual(rv.status_code, 400)
+
+        # try to register user with same nickname
+        invalid_user = {
+            'username': users[0]['username'],
+            'email': 'qwerty@qwerty.qwerty',
+            'password': 'qwerty'
+        }
+        rv = self.client.post(path='/user', data=json.dumps(invalid_user), headers=self.get_headers())
+        self.assertEqual(rv.status_code, 400)
+
+        # try to register user with same email
+        invalid_user = {
+            'username': 'qwerty',
+            'email': users[0]['email'],
+            'password': 'qwerty'
+        }
+        rv = self.client.post(path='/user', data=json.dumps(invalid_user), headers=self.get_headers())
+        self.assertEqual(rv.status_code, 400)
+
+        # modify users[0]
+        users[0]['username'] = 'nicholas'
+        rv = self.client.put(path=locations[0], data=json.dumps(users[0]), headers=self.get_headers())
+        data = json.loads(rv.get_data())
+        self.assertEqual(rv.status_code, 201)
+        self.assertEqual(data['username'], users[0]['username'])
+        self.assertTrue('email' not in data)
+        self.assertTrue('password' not in data)
+
+        # delete users
+        for i in xrange(len(locations)):
+            rv = self.client.delete(path=locations[i], headers=self.get_headers())
+            self.assertEqual(rv.status_code, 204)
+
+        # try to get users
+        for i in xrange(len(locations)):
+            rv = self.client.get(path=locations[i], headers=self.get_headers())
+            self.assertEqual(rv.status_code, 400)
+
     def test_categories(self):
+        # create users
+        users = self.get_users()
+        for user in users:
+            self.client.post(path='/user', data=json.dumps(user), headers=self.get_headers())
+
         # create categories
         categories = self.get_categories()
         locations = []
-
         for category in categories:
             rv = self.client.post(path='/category', data=json.dumps(category), headers=self.get_headers())
             self.assertEqual(rv.status_code, 201)
@@ -73,6 +151,11 @@ class ApiTest(BaseTest):
         self.assertEqual(rv.status_code, 400)
 
     def test_sensors(self):
+        # create users
+        users = self.get_users()
+        for user in users:
+            self.client.post(path='/user', data=json.dumps(user), headers=self.get_headers())
+
         # create categories
         categories = self.get_categories()
         for category in categories:
@@ -136,6 +219,11 @@ class ApiTest(BaseTest):
         self.assertEqual(rv.status_code, 400)
 
     def test_datas(self):
+        # create users
+        users = self.get_users()
+        for user in users:
+            self.client.post(path='/user', data=json.dumps(user), headers=self.get_headers())
+
         # create categories
         categories = self.get_categories()
         for category in categories:
@@ -201,6 +289,11 @@ class ApiTest(BaseTest):
             self.assertEqual(data['type'], chart_types[i])
 
     def test_subviews(self):
+        # create users
+        users = self.get_users()
+        for user in users:
+            self.client.post(path='/user', data=json.dumps(user), headers=self.get_headers())
+
         # create categories
         categories = self.get_categories()
         for category in categories:
@@ -259,6 +352,11 @@ class ApiTest(BaseTest):
         self.assertEqual(rv.status_code, 200)
 
     def test_views(self):
+        # create users
+        users = self.get_users()
+        for user in users:
+            self.client.post(path='/user', data=json.dumps(user), headers=self.get_headers())
+
         # create categories
         categories = self.get_categories()
         for category in categories:

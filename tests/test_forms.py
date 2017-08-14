@@ -3,16 +3,134 @@ import json
 from data_visualization.queries import create_chartconfigs
 
 from tests import BaseTest
+from data_visualization.models import User
 
 class FormsTest(BaseTest):
+    def test_user_form(self):
+        import re
+        from data_visualization import mail
+
+        user = {
+            'username': 'virtuser0',
+            'email': 'virtuser0@localhost.loc',
+            'password': 'virtpass',
+            'repeat_password': 'virtpass'
+        }
+
+        with mail.record_messages() as outbox:
+            # add a user with form
+            rv = self.client.post(path='/forms/users/add', data=json.dumps(user), headers=self.get_headers())
+            self.assertEqual(rv.status_code, 302)
+
+            # check if confirmation email was sent
+            self.assertEqual(len(outbox), 1)
+            self.assertEqual(len(outbox[0].recipients), 1)
+            self.assertEqual(outbox[0].recipients[0], user['email'])
+            self.assertEqual(outbox[0].subject, 'Confirm Your Account')
+
+            # check if public endpoint is availbale without email confirmation
+            rv = self.client.get(path='/forms/login', follow_redirects=True)
+            self.assertEqual(rv.status_code, 200)
+
+            # confirm email
+            link = '/'.join(re.findall(pattern='<a href="(.*?)">', string=outbox[0].html)[0].split('/')[-2:])
+            self.client.get(path=link, headers=self.get_headers())
+            with self.client.session_transaction() as session:
+                self.assertTrue(session.get('_flashes', None) and ('success', 'You have successfully activated your account.') in session['_flashes'])
+            rv = self.client.get(path='/{0}'.format(user['username']), headers=self.get_headers())
+            self.assertEqual(rv.status_code, 200)
+
+            # logout
+            self.client.get(path='/logout', headers=self.get_headers())
+
+            # check if non-public endpoints are unavailable when logged out
+            self.client.get(path='/forms/sensors/add', headers=self.get_headers(), follow_redirects=True)
+            with self.client.session_transaction() as session:
+                self.assertTrue(session.get('_flashes', None) and session['_flashes'][-1] == ('error', 'Unauthorized'))
+            self.client.get(path='/categories', headers=self.get_headers(), follow_redirects=True)
+            with self.client.session_transaction() as session:
+                self.assertTrue(session.get('_flashes', None) and session['_flashes'][-1] == ('error', 'Unauthorized'))
+
+            # login
+            login_data = {
+                'username': user['username'],
+                'password': user['password']
+            }
+            self.client.post(path='/forms/login', data=json.dumps(login_data), headers=self.get_headers())
+
+            # check if non-public endpoints are available after login
+            rv = self.client.get(path='/forms/sensors/add', headers=self.get_headers())
+            self.assertEqual(rv.status_code, 200)
+            rv = self.client.get(path='/categories', headers=self.get_headers())
+            self.assertEqual(rv.status_code, 200)
+
+            # edit user with form
+            user['username'] = 'virtuser1'
+            rv = self.client.post(path='/forms/users/edit', data=json.dumps(user), headers=self.get_headers())
+            self.assertEqual(rv.status_code, 302)
+            rv = self.client.get(path='/user', headers=self.get_headers())
+            data = json.loads(rv.get_data())
+            self.assertTrue('email' not in data.iterkeys())
+            self.assertTrue('password' not in data.iterkeys())
+            for key, value in data.iteritems():
+                if key != 'id' and key != 'links':
+                    self.assertEqual(user[key], data[key])
+
+            # invalid 'username' length on form
+            user['username'] = 'qwertyu'
+            rv = self.client.post(path='/forms/users/edit', data=json.dumps(user), headers=self.get_headers())
+            self.assertEqual(rv.status_code, 200)
+            user['username'] = 'qwertyuiopasdfghjklzxqwertyuiopas'
+            rv = self.client.post(path='/forms/users/edit', data=json.dumps(user), headers=self.get_headers())
+            self.assertEqual(rv.status_code, 200)
+
+            # invalid 'email' on form
+            user['email'] = 'qwerty@qwerty'
+            rv = self.client.post(path='/forms/users/edit', data=json.dumps(user), headers=self.get_headers())
+            self.assertEqual(rv.status_code, 200)
+
+            # invalid 'repeat_password' on form
+            user['password'] = 'qwerty'
+            user['repeat_password'] = 'asdfg'
+            rv = self.client.post(path='/forms/users/edit', data=json.dumps(user), headers=self.get_headers())
+            self.assertEqual(rv.status_code, 200)
+
+            # create another user
+            user2 = {
+                'username': 'virtuser2',
+                'email': 'virtuser2@localhost.loc',
+                'password': 'virtpassword2',
+                'repeat_password': 'virtpassword2'
+            }
+            self.client.post(path='/forms/users/add', data=json.dumps(user2), headers=self.get_headers())
+
+            # logout
+            self.client.post(path='/logout', headers=self.get_headers())
+
+            # try to login without email confirmation
+            login_data = {
+                'username': user2['username'],
+                'password': user2['password']
+            }
+
+            self.client.post(path='/forms/login', data=json.dumps(login_data), headers=self.get_headers())
+            with self.client.session_transaction() as session:
+                self.assertTrue(session.get('_flashes', None) and session['_flashes'][-1] == ('warning', 'Please activate your account!'))
+
     def test_category_form(self):
+        # add a user
+        user = self.get_users()[0]
+        User.generate_fake_user(user['username'], user['email'], user['password'])
+        self.client.post(path='/forms/login', data=json.dumps({'username': user['username'], 'password': user['password']}), headers=self.get_headers())
+
         # add a category with form
         category = {
             'name': 'virtcateg',
             'min_value': 10,
-            'max_value': 40
+            'max_value': 40,
+            'user_id': 1
         }
-        rv = self.client.post(path='/forms/categories/add', data=json.dumps(category), headers=self.get_headers())
+        rv = self.client.post(path='/forms/categories/add/{0}'.format(category['user_id']), data=json.dumps(category), headers=self.get_headers())
         self.assertEqual(rv.status_code, 302)
         rv = self.client.get(path='/categories', headers=self.get_headers())
         data = json.loads(rv.get_data())['categories']
@@ -64,6 +182,11 @@ class FormsTest(BaseTest):
         self.assertEqual(rv.status_code, 302)
 
     def test_sensor_form(self):
+        # add a user
+        user = self.get_users()[0]
+        User.generate_fake_user(user['username'], user['email'], user['password'])
+        self.client.post(path='/forms/login', data=json.dumps({'username': user['username'], 'password': user['password']}), headers=self.get_headers())
+
         # add category
         category = self.get_categories()[0]
         rv = self.client.post(path='/category', data=json.dumps(category), headers=self.get_headers())
@@ -130,6 +253,11 @@ class FormsTest(BaseTest):
         self.assertEqual(rv.status_code, 302)
 
     def test_subview_form(self):
+        # add a user
+        user = self.get_users()[0]
+        User.generate_fake_user(user['username'], user['email'], user['password'])
+        self.client.post(path='/forms/login', data=json.dumps({'username': user['username'], 'password': user['password']}), headers=self.get_headers())
+
         # add categories
         categories = self.get_categories()
         for category in categories:
@@ -169,6 +297,11 @@ class FormsTest(BaseTest):
             self.assertEqual(matches[i+j+3], chartconfig_types[j])
 
     def test_view_form(self):
+        # add a user
+        user = self.get_users()[0]
+        User.generate_fake_user(user['username'], user['email'], user['password'])
+        self.client.post(path='/forms/login', data=json.dumps({'username': user['username'], 'password': user['password']}), headers=self.get_headers())
+
         view = {
             'name': 'view1',
             'count': 1,

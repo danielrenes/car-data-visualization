@@ -162,7 +162,7 @@ class VirtualSensor(threading.Thread):
 
         if category_id is None:
             # register its category
-            conn.request('POST', '/category', json.dumps({'name': category_name, 'min_value': self.min, 'max_value': self.max}), headers)
+            conn.request('POST', '/category', json.dumps({'name': category_name, 'min_value': self.min, 'max_value': self.max, 'user_id': 1}), headers)
             resp = conn.getresponse()
             if resp.status != 201:
                 raise RegisterException('Could not register category')
@@ -228,6 +228,8 @@ if __name__ == '__main__':
     while not ping():
         time.sleep(1)
     time.sleep(1)
+
+    # user is created in app when 'debug-with-datafactory' command is selected
 
     sensor_threads = []
 

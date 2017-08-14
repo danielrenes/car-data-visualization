@@ -18,6 +18,10 @@ var load_categories = function() {
       html = json_to_html_table(data, null, true, true, true)[0].join(" ");
       $("#user_data").empty();
       $("#user_data").append(html);
+
+      if (data["categories"].length == 0) {
+        links.push(user_links["_fallback"]["categories"]);
+      }
   });
 };
 
@@ -45,6 +49,10 @@ var load_sensors = function() {
       $("#user_data").empty();
       $("#user_data").append(html);
     });
+
+    if (data["sensors"].length == 0) {
+      links.push(user_links["_fallback"]["sensors"]);
+    }
   });
 };
 
@@ -64,6 +72,10 @@ var load_views = function() {
       $this.siblings().removeClass("is-active");
       $this.addClass("is-active");
       load_subviews(active_breadcrumb);
+    }
+
+    if (data["views"].length == 0) {
+      links.push(user_links["_fallback"]["views"]);
     }
   });
 };
@@ -123,6 +135,11 @@ var load_subviews = function(view_idx) {
       $("#user_data").append(html);
     });
   });
+
+  if (subview_links.length == 0) {
+    console.log(links[view_idx]);
+    sublinks.push(links[view_idx]["_fallback"]["subviews"]);
+  }
 };
 
 var load_tab = function(name) {

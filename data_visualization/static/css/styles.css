@@ -1,6 +1,67 @@
 header {
-  padding: 20px;
-  text-align: center;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 80px;
+}
+
+.user_settings {
+  position: relative;
+  cursor: pointer;
+}
+
+.menu {
+  position: absolute;
+  left: 10px;
+  top: 30px;
+  padding: 4px;
+  z-index: 2;
+  background: white;
+  box-shadow: 0px 0px 3px 1px black;
+  display: none;
+}
+
+.menu.opened {
+  display: block;
+}
+
+.login_form_wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 400px;
+}
+
+.login_form_wrap > .loaded_content > form {
+  display: flex;
+  justify-content: space-between;
+  width: 300px;
+}
+
+.login_form_wrap > .loaded_content > form > .field {
+  height: 35px;
+}
+
+.login_form_wrap > .loaded_content > form > .field > label {
+  font-weight: 300;
+  font-size: 14px;
+}
+
+.login_form_wrap > .loaded_content > form > .field > .control {
+  width: 125px;
+}
+
+.login_form_wrap > .loaded_content > form > .field > .control > input {
+  height: 35px;
+}
+
+.login_form_wrap > p.title {
+  display: none;
+}
+
+.login_form_wrap > button {
+  width: 60px;
+  height: 35px;
 }
 
 span.icon {
@@ -8,7 +69,7 @@ span.icon {
   cursor: pointer;
 }
 
-#user_data {
+.content_wrap {
   margin-left: auto;
   margin-right: auto;
   min-width: 600px;
@@ -26,4 +87,9 @@ span.icon {
   position: relative;
   height: auto;
   width: auto;
+}
+
+.subtitle {
+  line-height: 1.5;
+  text-align: justify;
 }

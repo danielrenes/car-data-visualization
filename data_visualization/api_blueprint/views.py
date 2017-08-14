@@ -37,6 +37,8 @@ def add_view():
 @api.route('/view/<id>', methods=['PUT'])
 def modify_view(id):
     view = all_views().filter(View.id==id).first()
+    if view is None:
+        abort(400)
     request_data = json.loads(request.data)
     if 'count' in request_data.iterkeys():
         if not view.check_count(request_data['count']):
@@ -67,6 +69,4 @@ def remove_view(id):
     except IntegrityError:
         db.session.rollback()
         abort(400)
-    resp = jsonify('')
-    resp.status_code = 204
-    return resp
+    return '', 204

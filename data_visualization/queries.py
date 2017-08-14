@@ -1,6 +1,6 @@
 from . import db
 from .chartjs import chart_types
-from .models import Category, Sensor, Data, Subview, View, ChartConfig
+from .models import Category, Sensor, Data, Subview, View, ChartConfig, User
 
 def all_categories():
     return Category.query
@@ -19,6 +19,9 @@ def all_views():
 
 def all_chartconfigs():
     return ChartConfig.query
+
+def all_users():
+    return User.query
 
 def create_chartconfigs():
     for chart_type in chart_types:

@@ -1,5 +1,8 @@
 import datetime
-from flask import url_for, abort
+from flask import url_for, abort, current_app
+from flask_login import UserMixin
+from itsdangerous import URLSafeTimedSerializer
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from . import db
 
@@ -14,6 +17,97 @@ def check_keys(legal_keys, keys):
             abort(400)
         found_keys.append(key)
 
+class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    username = db.Column(db.String(32), unique=True, nullable=False)
+    email = db.Column(db.String(64), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+    confirmed = db.Column(db.Boolean, default=False)
+
+    categories = db.relationship('Category', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+
+    @property
+    def password(self):
+        pass
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def generate_confirmation_token(self):
+        serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        return serializer.dumps({'confirm': self.id})
+
+    def confirm_email(self, token, expiration=3600):
+        serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        try:
+            data = serializer.loads(token, max_age=expiration)
+        except:
+            return False
+        if data.get('confirm') != self.id:
+            return False
+        self.confirmed = True
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            return False
+        return True
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'links': {
+                'self': url_for('api.get_user'),
+                'form_edit': url_for('forms.edit_user_form'),
+                'categories': [url_for('api.get_category', id=categ.id) for categ in self.categories],
+                '_fallback': {
+                    'categories': {
+                        'form_add': url_for('forms.add_category_form', user_id=self.id),
+                    },
+                    'sensors': {
+                        'form_add': url_for('forms.add_sensor_form'),
+                    },
+                    'views': {
+                        'form_add': url_for('forms.add_view_form')
+                    }
+                }
+            }
+        }
+
+    @staticmethod
+    def from_dict(data):
+        if data is None:
+            abort(400)
+        legal_keys = ['username', 'email', 'password']
+        data_keys = data.keys()
+        check_keys(legal_keys, data_keys)
+        user = User()
+        for key in data_keys:
+            setattr(user, key, data[key])
+        return user
+
+    @property
+    def user_slug(self):
+        return self.username.replace(' ', '.')
+
+    @staticmethod
+    def generate_fake_user(username, email, password):
+        if current_app.config['DEBUG']:
+            fake_user = User(username=username, email=email, password=password, confirmed=True)
+            db.session.add(fake_user)
+            try:
+                db.session.commit()
+            except:
+                db.session.rollback()
+
 class Category(db.Model):
     __tablename__ = 'categories'
 
@@ -22,6 +116,8 @@ class Category(db.Model):
     name = db.Column(db.String(20), unique=True, nullable=False)
     min_value = db.Column(db.Integer, nullable=False)
     max_value = db.Column(db.Integer, nullable=False)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     sensors = db.relationship('Sensor', backref='category', lazy='dynamic', cascade='all, delete-orphan')
 
@@ -33,7 +129,7 @@ class Category(db.Model):
             'max_value': self.max_value,
             'links': {
                 'self': url_for('api.get_category', id=self.id),
-                'form_add': url_for('forms.add_category_form'),
+                'form_add': url_for('forms.add_category_form', user_id=self.user_id),
                 'form_edit': url_for('forms.edit_category_form', id=self.id),
                 'sensors': [url_for('api.get_sensor', id=sensor.id) for sensor in self.sensors]
             }
@@ -43,7 +139,7 @@ class Category(db.Model):
     def from_dict(data):
         if data is None:
             abort(400)
-        legal_keys = ['name', 'min_value', 'max_value']
+        legal_keys = ['name', 'min_value', 'max_value', 'user_id']
         data_keys = data.keys()
         check_keys(legal_keys, data_keys)
         categ = Category()
@@ -242,7 +338,12 @@ class View(db.Model):
                 'charts_refresh': url_for('api.refresh_charts', view_id=self.id),
                 'form_add': url_for('forms.add_view_form'),
                 'form_edit': url_for('forms.edit_view_form', id=self.id),
-                'subviews': [url_for('api.get_subview', id=subview.id) for subview in self.subviews]
+                'subviews': [url_for('api.get_subview', id=subview.id) for subview in self.subviews],
+                '_fallback': {
+                    'subviews': {
+                        'form_add': url_for('forms.add_subview_form', view_id=self.id)
+                    }
+                }
             }
         }
 

@@ -18,22 +18,39 @@ class BaseTest(unittest.TestCase):
             'Content-type': 'application/json'
         }
 
+    def get_users(self):
+        return [
+            {
+                'username': 'nickynicholas',
+                'email': 'nicky@localhost',
+                'password': 'everythingisnicky'
+            },
+            {
+                'username': 'asddsaasd',
+                'email': 'asd@localhost',
+                'password': 'asddsa'
+            }
+        ]
+
     def get_categories(self):
         return [
             {
                 'name': 'temperature',
                 'min_value': -50,
-                'max_value': 50
+                'max_value': 50,
+                'user_id': 1
             },
             {
                 'name': 'humidity',
                 'min_value': 0,
-                'max_value': 100
+                'max_value': 100,
+                'user_id': 1
             },
             {
                 'name': 'pressure',
                 'min_value': 0,
-                'max_value': 10000
+                'max_value': 10000,
+                'user_id': 2
             }
         ]
 

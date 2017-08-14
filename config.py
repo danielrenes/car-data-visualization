@@ -15,6 +15,9 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     WTF_CSRF_ENABLED = False
+    MAIL_SERVER = 'localhost'
+    MAIL_PORT = 5001
+    MAIL_DEFAULT_SENDER = 'Data Visualization - noreply <noreply@localhost>'
 
 config = {
     'development': DevelopmentConfig,

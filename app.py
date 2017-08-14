@@ -14,12 +14,28 @@ def init_db():
         db.create_all()
         create_chartconfigs()
 
-@app.cli.command('run-with-datafactory', help='Run server and datafactory.')
-def run_with_datafactory():
+@app.cli.command('debug', help='Start in debug mode.')
+def debug():
+    app.run(debug=True)
+
+@app.cli.command('debug-with-user', help='Start in debug mode with pre-created user.')
+def debug_with_user():
     with app.app_context():
         db.drop_all()
         db.create_all()
         create_chartconfigs()
+        from data_visualization.models import User
+        User.generate_fake_user('Fake User', 'fakeemail@localhost.loc', 'fakepassword')
+    app.run(debug=True)
+
+@app.cli.command('debug-with-datafactory', help='Start in debug mode with datafactory.')
+def debug_with_datafactory():
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        create_chartconfigs()
+        from data_visualization.models import User
+        User.generate_fake_user('Fake User', 'fakeemail@localhost.loc', 'fakepassword')
     import subprocess
     datafactory_proc = subprocess.Popen(['python', './datafactory.py'])
     try:

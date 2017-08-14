@@ -1,4 +1,7 @@
 $(document).ready(function() {
+  $(document).click(fn_close_user_menu);
+  $(".user_settings").click(fn_handle_user_menu);
+  $("#edit_account").click(fn_edit_account);
   $(".tabs > ul > li").each(fn_find_active_tab);
   $(".tabs > ul > li").click(fn_select_tab);
   $(".modal-card > header > .delete").add(".modal-card > footer > a").click(fn_close_modal);

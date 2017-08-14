@@ -1,15 +1,31 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, HiddenField
+from wtforms import StringField, IntegerField, HiddenField, PasswordField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from wtforms.validators import Required, Optional, Length, IPAddress, NumberRange, AnyOf
+from wtforms.validators import Required, Optional, Length, IPAddress, NumberRange, AnyOf, Email, EqualTo
 
 from .models import Category, Sensor, ChartConfig
 from .queries import all_categories, all_sensors, all_chartconfigs
+
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[Required(), Length(min=8, max=32)])
+    password = PasswordField('Password', validators=[Required()])
+
+class UserForm(FlaskForm):
+    username = StringField('Username', validators=[Required(), Length(min=8, max=32)])
+    email = StringField('Email', validators=[Required(), Email()])
+    password = PasswordField('Password', validators=[Required(), EqualTo('repeat_password')])
+    repeat_password = PasswordField('Repeat password')
+
+    def populate_obj(self, user):
+        user.username = self.username.data
+        user.email = self.email.data
+        user.password = self.password.data
 
 class CategoryForm(FlaskForm):
     name = StringField('Name', validators=[Required(), Length(min=4, max=20)])
     min_value = IntegerField('Minimum value', validators=[Required()])
     max_value = IntegerField('Maximum value', validators=[Required()])
+    user_id = HiddenField('User')
 
 class SensorForm(FlaskForm):
     name = StringField('Name', validators=[Required(), Length(min=4, max=20)])

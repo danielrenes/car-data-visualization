@@ -1,3 +1,22 @@
+var fn_close_user_menu = function() {
+  $(".menu").removeClass("opened");
+}
+
+var fn_handle_user_menu = function(e) {
+  $(".menu").toggleClass("opened");
+  e.stopPropagation();
+}
+
+var fn_edit_account = function() {
+  $.ajax({
+    url: user_links["form_edit"],
+    type: "GET",
+    datatype: "html"
+  }).done(function(data) {
+    load_modal(data);
+  });
+}
+
 var fn_find_active_tab = function() {
   let $this = $(this);
   if ($this.text().toLowerCase() == active_tab) {

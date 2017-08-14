@@ -1,4 +1,17 @@
 /**
+ * Load the links associated with the user account.
+*/
+var get_user_links = function(destination) {
+  $.ajax({
+    url: "/user",
+    type: "GET",
+    datatype: "json"
+  }).done(function(data) {
+    user_links = data["links"];
+  });
+}
+
+/**
  * Find cookie value for the given search key.
  * @param {String} searchKey key for the cookie
  * @return {String} the cookie value for the key or null if there is no cookie with the given key
@@ -132,32 +145,36 @@ var json_to_breadcrumb = function(data) {
     break;
   }
 
-  html.push("<nav class='breadcrumb is-centered'>", "<ul>");
+  if (data.length == 0) {
+    html.push("<span class='icon add'>", "<i class='fa fa-plus-square'>", "</i>", "</span>");
+  } else {
+    html.push("<nav class='breadcrumb is-centered'>", "<ul>");
 
-  for (let i = 0; i < data.length; i++) {
-    let obj = data[i];
-    let title = null;
-    let icon_href = null;
-    for (let key in obj) {
-      if (key == "name") {
-        title = obj[key];
-      } else if (key == "links") {
-        let obj_links = obj[key];
-        links.push(obj_links);
-        for (let key2 in obj_links) {
-          if (key2 == "icon") {
-            icon_href = obj_links[key2];
+    for (let i = 0; i < data.length; i++) {
+      let obj = data[i];
+      let title = null;
+      let icon_href = null;
+      for (let key in obj) {
+        if (key == "name") {
+          title = obj[key];
+        } else if (key == "links") {
+          let obj_links = obj[key];
+          links.push(obj_links);
+          for (let key2 in obj_links) {
+            if (key2 == "icon") {
+              icon_href = obj_links[key2];
+            }
           }
         }
       }
+
+      if (title != null && icon_href != null) {
+        html.push("<li>", "<a>", "<span class='icon is-small'>", "<img src='" + icon_href + "'>", "</img>", "</span>", "<span>", title, "</span>", "</a>", "</li>");
+      }
     }
 
-    if (title != null && icon_href != null) {
-      html.push("<li>", "<a>", "<span class='icon is-small'>", "<img src='" + icon_href + "'>", "</img>", "</span>", "<span>", title, "</span>", "</span>", "</a>", "</li>");
-    }
+    html.push("</ul>", "</nav>");
   }
-
-  html.push("</ul>", "</nav>");
 
   return html.join("");
 };

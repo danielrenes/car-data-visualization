@@ -32,6 +32,8 @@ def add_subview():
 @api.route('/subview/<id>', methods=['PUT'])
 def modify_subview(id):
     subview = all_subviews().filter(Subview.id==id).first()
+    if subview is None:
+        abort(400)
     request_data = json.loads(request.data)
     if 'view_id' in request_data.iterkeys():
         view = all_views().filter(View.id==id).first()
@@ -60,6 +62,4 @@ def remove_subview(id):
     except IntegrityError:
         db.session.rollback()
         abort(400)
-    resp = jsonify('')
-    resp.status_code = 204
-    return resp
+    return '', 204
