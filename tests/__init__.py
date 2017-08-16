@@ -12,11 +12,17 @@ class BaseTest(unittest.TestCase):
     def tearDown(self):
         db.drop_all()
 
-    def get_headers(self):
-        return {
+    def get_headers(self, username=None, password=None, token=None):
+        from base64 import b64encode
+        headers = {
             'Accept': 'application/json',
             'Content-type': 'application/json'
         }
+        if username and password:
+            headers['Authorization'] = 'Basic {0}'.format(b64encode('{0}:{1}'.format(username, password)))
+        if token:
+            headers['Authorization'] = 'Basic {0}'.format(b64encode('{0}:'.format(token)))
+        return headers
 
     def get_users(self):
         return [
@@ -101,7 +107,7 @@ class BaseTest(unittest.TestCase):
                 'view_id': 2
             },
             {
-                'sensor_id': 3,
+                'sensor_id': 2,
                 'chartconfig_id': 3,
                 'view_id': 2
             }

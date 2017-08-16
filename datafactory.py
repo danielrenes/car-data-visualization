@@ -5,10 +5,12 @@ import json
 import random
 import threading
 import time
+from base64 import b64encode
 
 headers = {
     'Content-type': 'application/json',
-    'Accept': 'application/json'
+    'Accept': 'application/json',
+    'Authorization': 'Basic {0}'.format(b64encode('Fake User:fakepassword'))
 }
 
 sensors = [
@@ -150,15 +152,17 @@ class VirtualSensor(threading.Thread):
         category_id = None
 
         # search its category
-        conn.request('GET', '/categories', headers=headers)
+        conn.request('GET', '/user', headers=headers)
         resp = conn.getresponse()
         if resp.status != 200:
             raise RegisterException('Could not fetch categories')
-        categories = json.loads(resp.read())['categories']
-        for category in categories:
+        category_locations = json.loads(resp.read())['links']['categories']
+        for category_location in category_locations:
+            conn.request('GET', category_location, headers=headers)
+            resp = conn.getresponse()
+            category = json.loads(resp.read())
             if category['name'] == category_name:
                 category_id = category['id']
-                break
 
         if category_id is None:
             # register its category

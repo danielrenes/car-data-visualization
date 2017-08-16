@@ -1,3 +1,8 @@
+user = {};
+get_user();
+
+get_token();
+
 var user_links = {};
 get_user_links();
 

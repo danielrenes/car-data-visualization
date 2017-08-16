@@ -16,15 +16,15 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"></link>
 
+    <script type=text/javascript>
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+
     <script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/globals.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/tabs.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/events.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
-
-    <script type=text/javascript>
-      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-    </script>
   </head>
 
   <body>

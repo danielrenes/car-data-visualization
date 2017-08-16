@@ -1,11 +1,80 @@
 /**
+ * Copy credidentials to object.
+ */
+var get_user = function() {
+  user["username"] = window.localStorage.getItem("username");
+  user["password"] = window.localStorage.getItem("password");
+}
+
+/**
+ * Get authentication token.
+ */
+var get_token = function() {
+  $.ajax({
+    url: $SCRIPT_ROOT + "/token",
+    type: "GET",
+    datatype: "json",
+    beforeSend: function(request) {
+      request.setRequestHeader("Authorization", "Basic " + get_username_password());
+    }
+  }).done(function(data) {
+    user["token"] = data["token"];
+    let expiration = new Date();
+    expiration.setSeconds(expiration.getSeconds() + data["expiration"]);
+    console.log("token expires at: " + expiration);
+    user["expiration"] = expiration;
+  });
+}
+
+/**
+ * Returns the username:password or token credidentials to be able to communicate with the API.
+ * @return {String} credidentials
+ */
+var get_authorization = function() {
+  if ("token" in user) {
+    let token = user["token"];
+    let now = new Date();
+    if (now < user["expiration"]) {
+      return "Basic " + window.btoa(token + ":");
+    } else {
+      get_token();
+      return "Basic " + get_username_password();
+    }
+  } else {
+    return "Basic " + get_username_password();
+  }
+}
+
+/**
+ * Returns username:password credidentials to be able to communicate with the API.
+ * @return {String} credidentials
+ */
+var get_username_password = function() {
+  let username = null;
+  let password = null;
+  if ("username" in user) {
+    username = window.atob(user["username"]);
+    password = window.atob(user["password"]);
+  } else {
+    username = window.localStorage.getItem("username");
+    password = window.localStorage.getItem("password");
+    user["username"] = username;
+    user["password"] = password;
+  }
+  return window.btoa(username + ":" + password);
+}
+
+/**
  * Load the links associated with the user account.
 */
-var get_user_links = function(destination) {
+var get_user_links = function() {
   $.ajax({
     url: "/user",
     type: "GET",
-    datatype: "json"
+    datatype: "json",
+    beforeSend: function(request) {
+      request.setRequestHeader("Authorization", get_authorization());
+    }
   }).done(function(data) {
     user_links = data["links"];
   });

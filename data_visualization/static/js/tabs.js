@@ -13,7 +13,10 @@ var load_categories = function() {
   $.ajax({
     url: $SCRIPT_ROOT + "/categories",
     type: "GET",
-    datatype: "json"
+    datatype: "json",
+    beforeSend: function(request) {
+      request.setRequestHeader("Authorization", get_authorization());
+    }
   }).done(function(data) {
       html = json_to_html_table(data, null, true, true, true)[0].join(" ");
       $("#user_data").empty();
@@ -29,7 +32,10 @@ var load_sensors = function() {
   $.ajax({
     url: $SCRIPT_ROOT + "/sensors",
     type: "GET",
-    datatype: "json"
+    datatype: "json",
+    beforeSend: function(request) {
+      request.setRequestHeader("Authorization", get_authorization());
+    }
   }).done(function(data) {
     let [html, markers, paths] = json_to_html_table(data, null, true, true, true);
     let requests = []
@@ -38,7 +44,10 @@ var load_sensors = function() {
       requests.push($.ajax({
         url: $SCRIPT_ROOT + paths[idx],
         type: "GET",
-        datatype: "json"
+        datatype: "json",
+        beforeSend: function(request) {
+          request.setRequestHeader("Authorization", get_authorization());
+        }
       }).done(function(data) {
         html[markers[idx]] = "<td>" + data["name"] + "</td>";
       }));
@@ -60,7 +69,10 @@ var load_views = function() {
   $.ajax({
     url: $SCRIPT_ROOT + "/views",
     type: "GET",
-    datatype: "json"
+    datatype: "json",
+    beforeSend: function(request) {
+      request.setRequestHeader("Authorization", get_authorization());
+    }
   }).done(function(data) {
     html = json_to_breadcrumb(data);
     $("#user_data").empty();
@@ -90,7 +102,10 @@ var load_subviews = function(view_idx) {
     requests.push($.ajax({
       url: $SCRIPT_ROOT + subview_links[idx],
       type: "GET",
-      datatype: "json"
+      datatype: "json",
+      beforeSend: function(request) {
+        request.setRequestHeader("Authorization", get_authorization());
+      }
     }).done(function(data) {
       filtered_data = {};
       for (let key in data) {
@@ -112,7 +127,10 @@ var load_subviews = function(view_idx) {
       requests2.push($.ajax({
         url: $SCRIPT_ROOT + paths[idx],
         type: "GET",
-        datatype: "json"
+        datatype: "json",
+        beforeSend: function(request) {
+          request.setRequestHeader("Authorization", get_authorization());
+        }
       }).done(function(data) {
         let value = "n/a";
 

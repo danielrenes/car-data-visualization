@@ -1,3 +1,8 @@
+var fn_login = function() {
+  window.localStorage.setItem("username", window.btoa($("#username").val()));
+  window.localStorage.setItem("password", window.btoa($("#password").val()));
+}
+
 var fn_close_user_menu = function() {
   $(".menu").removeClass("opened");
 }
@@ -97,7 +102,10 @@ var fn_icon_remove = function() {
     $.ajax({
       url: uselink[index]["self"],
       type: "DELETE",
-      datatype: "json"
+      datatype: "json",
+      beforeSend: function(request) {
+        request.setRequestHeader("Authorization", get_authorization());
+      }
     }).done(function() {
       load_tab(active_tab);
     });
@@ -106,7 +114,10 @@ var fn_icon_remove = function() {
   $.ajax({
     url: uselink[index]["self"],
     type: "GET",
-    datatype: "json"
+    datatype: "json",
+    beforeSend: function(request) {
+      request.setRequestHeader("Authorization", get_authorization());
+    }
   }).done(function(data) {
     let self = data["name"];
     let link_for = null;
@@ -135,7 +146,10 @@ var fn_icon_remove = function() {
         requests.push($.ajax({
           url: link,
           type: "GET",
-          datatype: "json"
+          datatype: "json",
+          beforeSend: function(request) {
+            request.setRequestHeader("Authorization", get_authorization());
+          }
         }).done(function(data) {
           deleted_objs["deleted"].push(data);
         }));
@@ -164,7 +178,10 @@ var fn_icon_remove = function() {
       $.ajax({
         url: uselink[index]["self"],
         type: "DELETE",
-        datatype: "json"
+        datatype: "json",
+        beforeSend: function(request) {
+          request.setRequestHeader("Authorization", get_authorization());
+        }
       }).done(function() {
         load_tab(active_tab);
       });
@@ -181,7 +198,10 @@ var fn_button_remove_confirmed = function() {
   $.ajax({
     url: last_link,
     type: "DELETE",
-    datatype: "json"
+    datatype: "json",
+    beforeSend: function(request) {
+      request.setRequestHeader("Authorization", get_authorization());
+    }
   }).done(function() {
     load_tab(active_tab);
     last_link = null;
@@ -246,13 +266,19 @@ var fn_icon_play = function() {
   $.ajax({
     url: links[link_index]["self"],
     type: "GET",
-    datatype: "json"
+    datatype: "json",
+    beforeSend: function(request) {
+      request.setRequestHeader("Authorization", get_authorization());
+    }
   }).done(function(data) {
     refresh_time = data["refresh_time"] * 1000;
     $.ajax({
       url: links[link_index]["charts_init"],
       type: "GET",
-      datatype: "html"
+      datatype: "html",
+      beforeSend: function(request) {
+        request.setRequestHeader("Authorization", get_authorization());
+      }
     }).done(function(data) {
       if ($(".loaded_content").length) {
         $(".loaded_content").remove();
@@ -272,7 +298,10 @@ var fn_icon_play = function() {
           url: links[link_index]["charts_refresh"],
           type: "GET",
           data: request_data,
-          datatype: "json"
+          datatype: "json",
+          beforeSend: function(request) {
+            request.setRequestHeader("Authorization", get_authorization());
+          }
         }).done(function(data) {
           $("canvas").each(function() {
             let $this = $(this);

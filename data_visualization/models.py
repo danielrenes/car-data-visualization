@@ -1,7 +1,7 @@
 import datetime
 from flask import url_for, abort, current_app
 from flask_login import UserMixin
-from itsdangerous import URLSafeTimedSerializer
+from itsdangerous import TimedJSONWebSignatureSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from . import db
@@ -26,6 +26,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(64), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     confirmed = db.Column(db.Boolean, default=False)
+    token_used = db.Column(db.Boolean, default=False)
 
     categories = db.relationship('Category', backref='user', lazy='dynamic', cascade='all, delete-orphan')
 
@@ -40,14 +41,30 @@ class User(UserMixin, db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def generate_confirmation_token(self):
-        serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    def generate_confirmation_token(self, expiration=3600):
+        serializer = TimedJSONWebSignatureSerializer(current_app.config['SECRET_KEY'], expires_in=expiration)
         return serializer.dumps({'confirm': self.id})
 
-    def confirm_email(self, token, expiration=3600):
-        serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    def generate_auth_token(self, expiration=600):
+        serializer = TimedJSONWebSignatureSerializer(current_app.config['SECRET_KEY'], expires_in=expiration)
+        return serializer.dumps({'id': self.id})
+
+    @staticmethod
+    def verify_auth_token(token):
+        serializer = TimedJSONWebSignatureSerializer(current_app.config['SECRET_KEY'])
         try:
-            data = serializer.loads(token, max_age=expiration)
+            data = serializer.loads(token)
+        except:
+            return None
+        if not data.get('id', None):
+            return None
+        user = User.query.get_or_404(data['id'])
+        return user
+
+    def confirm_email(self, token):
+        serializer = TimedJSONWebSignatureSerializer(current_app.config['SECRET_KEY'])
+        try:
+            data = serializer.loads(token)
         except:
             return False
         if data.get('confirm') != self.id:
