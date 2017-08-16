@@ -33,7 +33,7 @@ class FormsTest(BaseTest):
             self.assertEqual(rv.status_code, 200)
 
             # confirm email
-            link = '/'.join(re.findall(pattern='<a href="(.*?)">', string=outbox[0].html)[0].split('/')[-2:])
+            link = '/'.join(re.findall(pattern='<a href="(.*?)" style.*?>', string=outbox[0].html)[0].split('/')[-2:])
             self.client.get(path=link, headers=self.get_headers())
             with self.client.session_transaction() as session:
                 self.assertTrue(session.get('_flashes', None) and ('success', 'You have successfully activated your account.') in session['_flashes'])
