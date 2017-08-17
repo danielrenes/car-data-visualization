@@ -1,18 +1,16 @@
 import json
 
-from flask import url_for, jsonify, abort, request
+from flask import g, url_for, jsonify, abort, request
 from sqlalchemy.exc import IntegrityError
 
 from . import api
 from .. import db
 from ..models import Subview, View
-from ..queries import all_subviews, all_views
+from ..queries import query_get_subview_by_id, query_get_view_by_id
 
 @api.route('/subview/<id>', methods=['GET'])
 def get_subview(id):
-    subview = all_subviews().filter(Subview.id==id).first()
-    if subview is None:
-        abort(400)
+    subview = query_get_subview_by_id(id, g.current_user.id)
     return jsonify(subview.to_dict())
 
 @api.route('/subview', methods=['POST'])
@@ -31,12 +29,10 @@ def add_subview():
 
 @api.route('/subview/<id>', methods=['PUT'])
 def modify_subview(id):
-    subview = all_subviews().filter(Subview.id==id).first()
-    if subview is None:
-        abort(400)
+    subview = query_get_subview_by_id(id, g.current_user.id)
     request_data = json.loads(request.data)
     if 'view_id' in request_data.iterkeys():
-        view = all_views().filter(View.id==id).first()
+        view = query_get_view_by_id(request_data['view_id'], g.current_user.id)
         if subview.view_id != request_data['view_id'] and view.is_full():
             abort(400)
     for key, value in request_data.iteritems():
@@ -53,9 +49,7 @@ def modify_subview(id):
 
 @api.route('/subview/<id>', methods=['DELETE'])
 def remove_subview(id):
-    subview = all_subviews().filter(Subview.id==id).first()
-    if subview is None:
-        abort(400)
+    subview = query_get_subview_by_id(id, g.current_user.id)
     db.session.delete(subview)
     try:
         db.session.commit()

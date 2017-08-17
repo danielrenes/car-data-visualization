@@ -4,7 +4,8 @@ from sqlalchemy.exc import IntegrityError
 
 from .. import db
 from ..models import Category, Sensor, Subview, View, ChartConfig, User
-from ..queries import all_categories, all_sensors, all_subviews, all_views, all_chartconfigs, all_users
+from ..queries import query_get_category_by_id, query_get_sensor_by_id, query_get_subview_by_id, query_get_view_by_id, \
+    query_get_user_by_id, query_get_user_by_name, query_get_chartconfig_by_id
 from ..forms import CategoryForm, SensorForm, SubviewForm, ViewForm, UserForm, LoginForm
 from ..utils import send_email
 from ..decorators import check_confirmed
@@ -15,7 +16,7 @@ forms = Blueprint('forms', __name__)
 def login_form():
     form = LoginForm()
     if form.validate_on_submit():
-        user = all_users().filter(User.username==form.username.data).first()
+        user = query_get_user_by_name(form.username.data)
         if user is None:
             abort(400)
         if not user.confirmed:
@@ -48,7 +49,7 @@ def add_user_form():
 @login_required
 @check_confirmed
 def edit_user_form():
-    user = all_users().filter(User.id==current_user.id).first()
+    user = query_get_user_by_id(current_user.id)
     form = UserForm(obj=user)
     if form.validate_on_submit():
         form.populate_obj(user)
@@ -67,9 +68,9 @@ def edit_user_form():
 def add_category_form(user_id):
     form = CategoryForm()
     if form.validate_on_submit():
-        categ = Category()
-        form.populate_obj(categ)
-        db.session.add(categ)
+        category = Category()
+        form.populate_obj(category)
+        db.session.add(category)
         try:
             db.session.commit()
         except IntegrityError:
@@ -82,10 +83,10 @@ def add_category_form(user_id):
 @login_required
 @check_confirmed
 def edit_category_form(id):
-    categ = all_categories().filter(Category.id==id).first()
-    form = CategoryForm(obj=categ)
+    category = query_get_category_by_id(id, current_user.id)
+    form = CategoryForm(obj=category)
     if form.validate_on_submit():
-        form.populate_obj(categ)
+        form.populate_obj(category)
         try:
             db.session.commit()
         except IntegrityError:
@@ -113,19 +114,19 @@ def add_sensor_form():
 @login_required
 @check_confirmed
 def edit_sensor_form(id):
-    sen = all_sensors().filter(Sensor.id==id).first()
-    form = SensorForm(obj=sen)
+    sensor = query_get_sensor_by_id(id, current_user.id)
+    form = SensorForm(obj=sensor)
 
     if form.validate_on_submit():
-        form.populate_obj(sen)
+        form.populate_obj(sensor)
         try:
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
         return redirect(url_for('main.userpage', user_slug=current_user.user_slug))
 
-    categ = all_categories().filter(Category.id==sen.category_id).first()
-    form.category_name.data = categ.name
+    category = query_get_category_by_id(sensor.category_id, current_user.id)
+    form.category_name.data = category.name
 
     return render_template('form.html.j2', title='Edit sensor', url=url_for('forms.edit_sensor_form', id=id), form=form, cta='Edit')
 
@@ -150,7 +151,7 @@ def add_subview_form(view_id):
 @login_required
 @check_confirmed
 def edit_subview_form(id):
-    subview = all_subviews().filter(Subview.id==id).first()
+    subview = query_get_subview_by_id(id)
     form = SubviewForm(obj=subview)
 
     if form.validate_on_submit():
@@ -161,8 +162,8 @@ def edit_subview_form(id):
             db.session.rollback()
         return redirect(url_for('main.userpage', user_slug=current_user.user_slug))
 
-    form.sensor_name.data = all_sensors().filter(Sensor.id==subview.sensor_id).first()
-    form.chartconfig_type.data = all_chartconfigs().filter(ChartConfig.id==subview.chartconfig_id).first()
+    form.sensor_name.data = query_get_sensor_by_id(subview.sensor_id, current_user.id)
+    form.chartconfig_type.data = query_get_chartconfig_by_id(subview.chartconfig_id)
 
     return render_template('form.html.j2', title='Edit subview', url=url_for('forms.edit_subview_form', id=id), form=form, cta='Edit')
 
@@ -186,7 +187,7 @@ def add_view_form():
 @login_required
 @check_confirmed
 def edit_view_form(id):
-    view = all_views().filter(View.id==id).first()
+    view = query_get_view_by_id(id, current_user.id)
     form = ViewForm(obj=view)
 
     if form.validate_on_submit():

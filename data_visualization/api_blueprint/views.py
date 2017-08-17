@@ -1,23 +1,20 @@
 import json
 
-from flask import url_for, jsonify, abort, request
+from flask import g, url_for, jsonify, abort, request
 from sqlalchemy.exc import IntegrityError
 
 from . import api
 from .. import db
 from ..models import View
-from ..queries import all_views
+from ..queries import query_all_views, query_get_view_by_id
 
 @api.route('/views', methods=['GET'])
 def get_views():
-    views = all_views().order_by(View.id).all()
-    return jsonify({'views': [view.to_dict() for view in views]})
+    return jsonify({'views': [view.to_dict() for view in query_all_views(g.current_user.id)]})
 
 @api.route('/view/<id>', methods=['GET'])
 def get_view(id):
-    view = all_views().filter(View.id==id).first()
-    if view is None:
-        abort(400)
+    view = query_get_view_by_id(id, g.current_user.id)
     return jsonify(view.to_dict())
 
 @api.route('/view', methods=['POST'])
@@ -36,9 +33,7 @@ def add_view():
 
 @api.route('/view/<id>', methods=['PUT'])
 def modify_view(id):
-    view = all_views().filter(View.id==id).first()
-    if view is None:
-        abort(400)
+    view = query_get_view_by_id(id, g.current_user.id)
     request_data = json.loads(request.data)
     if 'count' in request_data.iterkeys():
         if not view.check_count(request_data['count']):
@@ -60,9 +55,7 @@ def modify_view(id):
 
 @api.route('/view/<id>', methods=['DELETE'])
 def remove_view(id):
-    view = all_views().filter(View.id==id).first()
-    if view is None:
-        abort(400)
+    view = query_get_view_by_id(id, g.current_user.id)
     db.session.delete(view)
     try:
         db.session.commit()

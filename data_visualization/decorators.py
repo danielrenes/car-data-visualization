@@ -1,7 +1,7 @@
 from functools import wraps
 from threading import Thread
 
-from flask import flash, redirect, url_for
+from flask import flash, redirect, url_for, abort
 from flask_login import current_user
 
 def async(f):
@@ -18,4 +18,13 @@ def check_confirmed(f):
             flash('Please activate your account!', 'warning')
             return redirect(url_for('main.index'))
         return f(*args, **kwargs)
+    return wrapper
+
+def success_or_abort(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        result = f(*args, **kwargs)
+        if result is None:
+            abort(400)
+        return result
     return wrapper

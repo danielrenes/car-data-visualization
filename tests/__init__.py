@@ -104,10 +104,10 @@ class BaseTest(unittest.TestCase):
             {
                 'sensor_id': 2,
                 'chartconfig_id': 2,
-                'view_id': 2
+                'view_id': 1
             },
             {
-                'sensor_id': 2,
+                'sensor_id': 3,
                 'chartconfig_id': 3,
                 'view_id': 2
             }
@@ -117,12 +117,14 @@ class BaseTest(unittest.TestCase):
         return [
             {
                 'name': 'view1',
-                'count': 1,
-                'refresh_time': 10
+                'count': 2,
+                'refresh_time': 10,
+                'user_id': 1
             },
             {
                 'name': 'view2',
-                'count': 2,
-                'refresh_time': 60
+                'count': 1,
+                'refresh_time': 60,
+                'user_id': 2
             }
         ]

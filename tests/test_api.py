@@ -1,6 +1,6 @@
 import json
 
-from data_visualization.queries import create_chartconfigs
+from data_visualization.utils import create_chartconfigs
 from data_visualization.models import User
 
 from tests import BaseTest
@@ -285,28 +285,31 @@ class ApiTest(BaseTest):
         create_chartconfigs()
 
         # create views
-        user = users[0]
         views = self.get_views()
         for view in views:
-            rv = self.client.post(path='/view', data=json.dumps(view), headers=self.get_headers(user['username'], user['password']))
+            user = users[view['user_id'] - 1]
+            self.client.post(path='/view', data=json.dumps(view), headers=self.get_headers(user['username'], user['password']))
 
         # create subviews
         subviews = self.get_subviews()
         locations = []
 
         for subview in subviews:
+            user = users[categories[sensors[subview['sensor_id'] - 1]['category_id'] - 1]['user_id'] - 1]
             rv = self.client.post(path='/subview', data=json.dumps(subview), headers=self.get_headers(user['username'], user['password']))
             self.assertEqual(rv.status_code, 201)
             locations.append(rv.headers['Location'])
 
         # check the returned 'Location' links
         for i in xrange(len(locations)):
+            user = users[categories[sensors[subviews[i]['sensor_id'] - 1]['category_id'] - 1]['user_id'] - 1]
             rv = self.client.get(path=locations[i], headers=self.get_headers(user['username'], user['password']))
             data = json.loads(rv.get_data())
             self.assertEqual(data['sensor_id'], subviews[i]['sensor_id'])
             self.assertEqual(data['chartconfig_id'], subviews[i]['chartconfig_id'])
 
         # modify subviews[0]
+        user = users[categories[sensors[subviews[0]['sensor_id'] - 1]['category_id'] - 1]['user_id'] - 1]
         subviews[0]['sensor_id'] = 2
         subviews[0]['chartconfig_id'] = 4
         rv = self.client.put(path=locations[0], data=json.dumps(subviews[0]), headers=self.get_headers(user['username'], user['password']))
@@ -351,16 +354,17 @@ class ApiTest(BaseTest):
         create_chartconfigs()
 
         # create views
-        user = users[0]
         views = self.get_views()
         locations = []
 
         for view in views:
+            user = users[view['user_id'] - 1]
             rv = self.client.post(path='/view', data=json.dumps(view), headers=self.get_headers(user['username'], user['password']))
             self.assertEqual(rv.status_code, 201)
             locations.append(rv.headers['Location'])
 
         # try to create view with 'count' > 4
+        user = users[0]
         rv = self.client.post(path='/view', data=json.dumps({'count': 5}), headers=self.get_headers(user['username'], user['password']))
         self.assertEqual(rv.status_code, 400)
 
@@ -372,29 +376,16 @@ class ApiTest(BaseTest):
         subviews = self.get_subviews()
         subview_locations = []
 
-        subviews[2]['view_id'] = 1
-
-        for i in xrange(len(subviews)):
-            rv = self.client.post(path='/subview', data=json.dumps(subviews[i]), headers=self.get_headers(user['username'], user['password']))
-            if i == 2:
-                self.assertEqual(rv.status_code, 400)
-            else:
-                self.assertEqual(rv.status_code, 201)
-                subview_locations.append(rv.headers['Location'])
-
-        subviews[2]['view_id'] = 2
-        rv = self.client.post(path='/subview', data=json.dumps(subviews[i]), headers=self.get_headers(user['username'], user['password']))
-        self.assertEqual(rv.status_code, 201)
-        subview_locations.append(rv.headers['Location'])
-
-        subviews[0]['view_id'] = 2
-        rv = self.client.put(subview_locations[0], data=json.dumps(subviews[0]), headers=self.get_headers(user['username'], user['password']))
-        self.assertEqual(rv.status_code, 400)
+        for subview in subviews:
+            user = users[categories[sensors[subview['sensor_id'] - 1]['category_id'] - 1]['user_id'] - 1]
+            rv = self.client.post(path='/subview', data=json.dumps(subview), headers=self.get_headers(user['username'], user['password']))
+            subview_locations.append(rv.headers['Location'])
 
         # check the returned 'Location' links
-        expected_icons = ['1x1', '2x1', '2x1']
+        expected_icons = ['2x1', '1x1']
 
         for i in xrange(len(locations)):
+            user = users[views[i]['user_id'] - 1]
             rv = self.client.get(path=locations[i], headers=self.get_headers(user['username'], user['password']))
             data = json.loads(rv.get_data())
             self.assertEqual(data['count'], views[i]['count'])
@@ -402,6 +393,7 @@ class ApiTest(BaseTest):
             self.assertTrue(expected_icons[i] in data['links']['icon'])
 
         # modify views[0]
+        user = users[views[0]['user_id'] - 1]
         views[0]['name'] = 'modifiedview'
         views[0]['count'] = 4
         rv = self.client.put(path=locations[0], data=json.dumps(views[0]), headers=self.get_headers(user['username'], user['password']))
@@ -412,6 +404,7 @@ class ApiTest(BaseTest):
         self.assertTrue('2x2' in data['links']['icon'])
 
         # try to modify the 'count' in views[1]
+        user = users[views[1]['user_id'] - 1]
         views[1]['count'] = 1
         rv = self.client.put(path=locations[1], data=json.dumps(views[1]), headers=self.get_headers(user['username'], user['password']))
         self.assertEqual(rv.status_code, 400)
@@ -425,6 +418,7 @@ class ApiTest(BaseTest):
         self.assertEqual(rv.status_code, 400)
 
         # try to modify the 'refresh_time' in views[0]
+        user = users[views[0]['user_id'] - 1]
         views[0]['refresh_time'] = 9
         rv = self.client.put(path=locations[0], data=json.dumps(views[0]), headers=self.get_headers(user['username'], user['password']))
         self.assertEqual(rv.status_code, 400)
@@ -434,11 +428,13 @@ class ApiTest(BaseTest):
         self.assertEqual(rv.status_code, 400)
 
         # remove views
-        for location in locations:
-            rv = self.client.delete(path=location, headers=self.get_headers(user['username'], user['password']))
+        for i in xrange(len(locations)):
+            user = users[views[i]['user_id'] - 1]
+            rv = self.client.delete(path=locations[i], headers=self.get_headers(user['username'], user['password']))
             self.assertEqual(rv.status_code, 204)
 
         # check if subviews were removed
-        for subview_location in subview_locations:
-            rv = self.client.get(path=subview_location, headers=self.get_headers(user['username'], user['password']))
+        for i in xrange(len(subview_locations)):
+            user = users[categories[sensors[subviews[i]['sensor_id'] - 1]['category_id'] - 1]['user_id'] - 1]
+            rv = self.client.get(path=subview_locations[i], headers=self.get_headers(user['username'], user['password']))
             self.assertEqual(rv.status_code, 400)

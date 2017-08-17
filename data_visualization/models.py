@@ -29,6 +29,7 @@ class User(UserMixin, db.Model):
     token_used = db.Column(db.Boolean, default=False)
 
     categories = db.relationship('Category', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    views = db.relationship('View', backref='user', lazy='dynamic', cascade='all, delete-orphan')
 
     @property
     def password(self):
@@ -85,6 +86,7 @@ class User(UserMixin, db.Model):
                 'self': url_for('api.get_user'),
                 'form_edit': url_for('forms.edit_user_form'),
                 'categories': [url_for('api.get_category', id=categ.id) for categ in self.categories],
+                'views': [url_for('api.get_view', id=view.id) for view in self.views],
                 '_fallback': {
                     'categories': {
                         'form_add': url_for('forms.add_category_form', user_id=self.id),
@@ -315,6 +317,8 @@ class View(db.Model):
     count = db.Column(db.Integer, nullable=False)
     refresh_time = db.Column(db.Integer, nullable=False)
 
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
     subviews = db.relationship('Subview', backref='view', lazy='dynamic', cascade='all, delete-orphan')
 
     @property
@@ -368,7 +372,7 @@ class View(db.Model):
     def from_dict(data):
         if data is None:
             abort(400)
-        legal_keys = ['name', 'count', 'refresh_time']
+        legal_keys = ['name', 'count', 'refresh_time', 'user_id']
         data_keys = data.keys()
         check_keys(legal_keys, data_keys)
         view = View()

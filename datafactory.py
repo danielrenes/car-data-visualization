@@ -41,17 +41,20 @@ views = [
     {
         'name':         'virtview0',
         'count':        1,
-        'refresh_time': 20
+        'refresh_time': 20,
+        'user_id':      1
     },
     {
         'name':         'virtview1',
         'count':        2,
-        'refresh_time': 10
+        'refresh_time': 10,
+        'user_id':      1
     },
     {
         'name':         'virtview2',
         'count':        4,
-        'refresh_time': 30
+        'refresh_time': 30,
+        'user_id':      1
     }
 ]
 

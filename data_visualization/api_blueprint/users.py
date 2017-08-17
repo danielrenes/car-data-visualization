@@ -6,16 +6,16 @@ from sqlalchemy.exc import IntegrityError
 from . import api
 from .. import db
 from ..models import User
-from ..queries import all_users
+from ..queries import query_get_user_by_id
 
 @api.route('/user', methods=['GET'])
 def get_user():
-    user = User.query.get_or_404(g.current_user.id)
+    user = query_get_user_by_id(g.current_user.id)
     return jsonify(user.to_dict())
 
 @api.route('/user', methods=['PUT'])
 def modify_user():
-    user = User.query.get_or_404(g.current_user.id)
+    user = query_get_user_by_id(g.current_user.id)
     for key, value in json.loads(request.data).iteritems():
         if key is not 'id':
             setattr(user, key, value)
@@ -30,7 +30,7 @@ def modify_user():
 
 @api.route('/user', methods=['DELETE'])
 def remove_user():
-    user = User.query.get_or_404(g.current_user.id)
+    user = query_get_user_by_id(g.current_user.id)
     db.session.delete(user)
     try:
         db.session.commit()

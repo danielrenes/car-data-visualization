@@ -1,45 +1,40 @@
 import json
 
-from flask import url_for, jsonify, abort, request
+from flask import g, url_for, jsonify, abort, request
 from sqlalchemy.exc import IntegrityError
 
 from . import api
 from .. import db
 from ..models import Sensor
-from ..queries import all_sensors
+from ..queries import query_all_sensors, query_get_sensor_by_id
 
 @api.route('/sensors', methods=['GET'])
 def get_sensors():
-    sens = all_sensors().order_by(Sensor.id).all()
-    return jsonify({'sensors': [sen.to_dict() for sen in sens]})
+    return jsonify({'sensors': [sensor.to_dict() for sensor in query_all_sensors(g.current_user.id)]})
 
 @api.route('/sensor', methods=['POST'])
 def add_sensor():
-    sen = Sensor.from_dict(json.loads(request.data))
-    db.session.add(sen)
+    sensor = Sensor.from_dict(json.loads(request.data))
+    db.session.add(sensor)
     try:
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
         abort(400)
-    resp = jsonify(sen.to_dict())
+    resp = jsonify(sensor.to_dict())
     resp.status_code = 201
-    resp.headers['Location'] = url_for('api.get_sensor', id=sen.id)
+    resp.headers['Location'] = url_for('api.get_sensor', id=sensor.id)
     return resp
 
 @api.route('/sensor/<id>', methods=['GET'])
 def get_sensor(id):
-    sen = all_sensors().filter(Sensor.id==id).first()
-    if sen is None:
-        abort(400)
-    return jsonify(sen.to_dict())
+    sensor = query_get_sensor_by_id(id, g.current_user.id)
+    return jsonify(sensor.to_dict())
 
 @api.route('/sensor/<id>', methods=['DELETE'])
 def remove_sensor(id):
-    sen = all_sensors().filter(Sensor.id==id).first()
-    if sen is None:
-        abort(400)
-    db.session.delete(sen)
+    sensor = query_get_sensor_by_id(id, g.current_user.id)
+    db.session.delete(sensor)
     try:
         db.session.commit()
     except IntegrityError:
@@ -49,17 +44,15 @@ def remove_sensor(id):
 
 @api.route('/sensor/<id>', methods=['PUT'])
 def modify_sensor(id):
-    sen = all_sensors().filter(Sensor.id==id).first()
-    if sen is None:
-        abort(400)
+    sensor = query_get_sensor_by_id(id, g.current_user.id)
     for key, value in json.loads(request.data).iteritems():
         if key is not 'id':
-            setattr(sen, key, value)
+            setattr(sensor, key, value)
     try:
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
         abort(400)
-    resp = jsonify(sen.to_dict())
+    resp = jsonify(sensor.to_dict())
     resp.status_code = 201
     return resp

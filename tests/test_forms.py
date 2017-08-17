@@ -1,6 +1,6 @@
 import json
 
-from data_visualization.queries import create_chartconfigs
+from data_visualization.utils import create_chartconfigs
 
 from tests import BaseTest
 from data_visualization.models import User
