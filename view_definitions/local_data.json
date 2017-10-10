@@ -1,0 +1,48 @@
+[
+  [
+    {
+      "data": "vehicle_speed",
+      "type": "gauge",
+      "subtype": "radial",
+      "width": 200,
+      "height": 200
+    },
+    {
+      "data": "engine_rpm",
+      "type": "gauge",
+      "subtype": "radial",
+      "width": 200,
+      "height": 200
+    },
+    {
+      "data": "selected_gear",
+      "type": "gauge",
+      "subtype": "linear",
+      "width": 50,
+      "height": 100
+    }
+  ],
+  [
+    {
+      "data": "clutch_position",
+      "type": "gauge",
+      "subtype": "linear",
+      "width": 50,
+      "height": 100
+    },
+    {
+      "data": "brake_position",
+      "type": "gauge",
+      "subtype": "linear",
+      "width": 50,
+      "height": 100
+    },
+    {
+      "data": "throttle_position",
+      "type": "gauge",
+      "subtype": "linear",
+      "width": 50,
+      "height": 100
+    }
+  ]
+]

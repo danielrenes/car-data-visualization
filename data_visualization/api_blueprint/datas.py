@@ -22,6 +22,21 @@ def add_data():
     resp.headers['Location'] = url_for('api.get_data', id=data.id)
     return resp
 
+@api.route('/data/batch', methods=['POST'])
+def add_batch_data():
+    request_data = json.loads(request.data)
+    sensor_id = request_data['sensor_id']
+    values = request_data['value']
+    for value in values:
+        data = Data.from_dict({'sensor_id': sensor_id, 'value': value})
+        db.session.add(data)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        abort(400)
+    return '', 201
+
 @api.route('/data/<id>', methods=['GET'])
 def get_data(id):
     data = query_get_data_by_id(id, g.current_user.id)

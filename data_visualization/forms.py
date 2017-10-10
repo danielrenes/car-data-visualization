@@ -27,11 +27,13 @@ class CategoryForm(FlaskForm):
     name = StringField('Name', validators=[Required(), Length(min=4, max=20)])
     min_value = IntegerField('Minimum value', validators=[Required()])
     max_value = IntegerField('Maximum value', validators=[Required()])
+    unit = StringField('Unit', validators=[Length(min=0, max=8)])
 
     def populate_obj(self, category):
         category.name = self.name.data
         category.min_value = self.min_value.data
         category.max_value = self.max_value.data
+        category.unit = self.unit.data
         category.user_id = current_user.id
 
 class SensorForm(FlaskForm):

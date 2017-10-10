@@ -219,7 +219,19 @@ var fn_select_breadcrumb = function() {
     let index = $("nav.breadcrumb > ul > li").index($this);
     active_breadcrumb = index;
     document.cookie = "active_breadcrumb=" + active_breadcrumb;
-    load_subviews(index);
+    $.ajax({
+      url: links[index]["self"],
+      type: "GET",
+      datatype: "json",
+      beforeSend: function(request) {
+        request.setRequestHeader("Authorization", get_authorization());
+      }
+    }).done(function(data) {
+      view_type = data["type"];
+      if (view_type == "normal") {
+        load_subviews(index);
+      }
+    });
     $this.siblings().removeClass("is-active");
     $this.addClass("is-active");
     let offset = $(this).offset();
@@ -287,36 +299,63 @@ var fn_icon_play = function() {
       chart_data_lengths = {};
       $("canvas").each(function() {
         chart_data_lengths[$(this).attr("id")] = 0;
+
+        // hack to display canvas-gauges
+        let data_type = $(this).attr("data-type");
+        if (typeof data_type !== typeof undefined && data_type !== false) {
+          let attr_copy = $(this).attr("data-type");
+          $(this).attr("data-type", "");
+          $(this).attr("data-type", attr_copy);
+        }
       });
-      interval_id = setInterval(function() {
-        request_data = {};
-        $("canvas").each(function() {
-          let key = $(this).attr("id");
-          request_data[key] = chart_data_lengths[key];
-        });
-        $.ajax({
-          url: links[link_index]["charts_refresh"],
-          type: "GET",
-          data: request_data,
-          datatype: "json",
-          beforeSend: function(request) {
-            request.setRequestHeader("Authorization", get_authorization());
-          }
-        }).done(function(data) {
+
+      $.ajax({
+        url: links[link_index]["self"],
+        type: "GET",
+        datatype: "json",
+        beforeSend: function(request) {
+          request.setRequestHeader("Authorization", get_authorization());
+        }
+      }).done(function(data) {
+        view_type = data["type"];
+
+        interval_id = setInterval(function() {
+          request_data = {};
           $("canvas").each(function() {
-            let $this = $(this);
-            let refresh_data = data[$this.attr("id")];
-            let data_length = chart_data_lengths[$this.attr("id")];
-            for (let i = 0; i < refresh_data.length; i++) {
-              window[$this.attr("id")].data.labels[data_length] = refresh_data[i]["timestamp"];
-              window[$this.attr("id")].data.datasets[0].data[data_length] = refresh_data[i]["value"];
-              data_length++;
-            }
-            chart_data_lengths[$this.attr("id")] = data_length;
-            window[$this.attr("id")].update();
+            let key = $(this).attr("id");
+            request_data[key] = chart_data_lengths[key];
           });
-        });
-      }, refresh_time);
+          $.ajax({
+            url: links[link_index]["charts_refresh"],
+            type: "GET",
+            data: request_data,
+            datatype: "json",
+            beforeSend: function(request) {
+              request.setRequestHeader("Authorization", get_authorization());
+            }
+          }).done(function(data) {
+            $("canvas").each(function() {
+              let $this = $(this);
+              let refresh_data = data[$this.attr("id")];
+              let data_length = chart_data_lengths[$this.attr("id")];
+
+              if (view_type == "normal") {
+                for (let i = 0; i < refresh_data.length; i++) {
+                  window[$this.attr("id")].data.labels[data_length] = refresh_data[i]["timestamp"];
+                  window[$this.attr("id")].data.datasets[0].data[data_length] = refresh_data[i]["value"];
+                  data_length++;
+                }
+                chart_data_lengths[$this.attr("id")] = data_length;
+                window[$this.attr("id")].update();
+              } else if (view_type == "preconfigured") {
+                setTimeout(function() {
+                  datareplay($this.attr("id"), refresh_data, chart_data_lengths);
+                }, 0);
+              }
+            });
+          });
+        }, refresh_time);
+      });
     });
   });
 };

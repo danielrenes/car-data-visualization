@@ -1,0 +1,24 @@
+{
+  "datatype": {
+    "datatype": "NumericDataType",
+    "name": "rpm",
+    "min": 0,
+    "max": 8000,
+    "current": 0,
+    "unit": "rpm"
+  },
+  "scenario": [
+    {
+      "duration": 3,
+      "step_or_value": 1000
+    },
+    {
+      "duration": 1,
+      "step_or_value": -1000
+    },
+    {
+      "duration": 9,
+      "step_or_value": 100
+    }
+  ]
+}

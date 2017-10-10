@@ -3,7 +3,7 @@ from flask import g, render_template, jsonify, abort, request
 from . import api
 from .. import chartjs
 from ..models import Category, ChartConfig, Sensor, View
-from ..queries import query_get_category_by_id, query_get_sensor_by_id, query_get_view_by_id, query_get_chartconfig_by_id
+from ..queries import query_get_category_by_id, query_get_sensor_by_id, query_get_sensor_by_name, query_get_view_by_id, query_get_chartconfig_by_id, query_get_predefined_config_by_id
 
 @api.route('/charts/<view_id>', methods=['GET'])
 def get_charts_skeleton(view_id):
@@ -34,4 +34,25 @@ def refresh_charts(view_id):
         last_index = int(request.args.get('chart{0}'.format(subview.id)))
         datas_since_index = query_get_sensor_by_id(subview.sensor_id, g.current_user.id).datas[last_index:]
         refresh_data['chart{0}'.format(subview.id)] = [data.to_dict() for data in datas_since_index]
+    return jsonify(refresh_data)
+
+@api.route('/get_preconfigured_skeleton/<view_id>', methods=['GET'])
+def get_preconfigured_skeleton(view_id):
+    view = query_get_view_by_id(view_id, g.current_user.id)
+    if view.type != 'preconfigured':
+        abort(400)
+    predefined_config = query_get_predefined_config_by_id(view.predefined_configuration_id).configuration
+    return predefined_config
+
+@api.route('/refresh_preconfigured/<view_id>', methods=['GET'])
+def refresh_preconfigured(view_id):
+    view = query_get_view_by_id(view_id, g.current_user.id)
+    if view.type != 'preconfigured':
+        abort(400)
+    predefined_config = query_get_predefined_config_by_id(view.predefined_configuration_id)
+    refresh_data = {}
+    for arg in request.args:
+        last_index = int(request.args.get(arg))
+        datas_since_index = query_get_sensor_by_id(query_get_sensor_by_name(arg, g.current_user.id).id, g.current_user.id).datas[last_index:]
+        refresh_data[arg] = [data.to_dict() for data in datas_since_index]
     return jsonify(refresh_data)

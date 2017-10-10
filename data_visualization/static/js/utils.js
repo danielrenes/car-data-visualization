@@ -247,3 +247,17 @@ var json_to_breadcrumb = function(data) {
 
   return html.join("");
 };
+
+var datareplay = function(element_id, data, chart_data_lengths) {
+  let index = 0;
+  let gauge = document.gauges.get(element_id);
+  setInterval(function() {
+    gauge.value = data[index]["value"];
+    index++;
+    chart_data_lengths[element_id] = index;
+  }, 1000);
+};
+
+// TODO
+// #1: seems like the datas start over
+// #2: about 30 seconds in new gauges appear on the screen (weird)

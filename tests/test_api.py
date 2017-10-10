@@ -365,11 +365,19 @@ class ApiTest(BaseTest):
 
         # try to create view with 'count' > 4
         user = users[0]
-        rv = self.client.post(path='/view', data=json.dumps({'count': 5}), headers=self.get_headers(user['username'], user['password']))
+        view = {
+            'name': 'invalidview',
+            'count': 5,
+            'refresh_time': 10,
+            'user_id': 1,
+            'type': 'normal'
+        }
+        rv = self.client.post(path='/view', data=json.dumps(view), headers=self.get_headers(user['username'], user['password']))
         self.assertEqual(rv.status_code, 400)
 
         # try to create view with 'count' not in [1, 2, 4]
-        rv = self.client.post(path='/view', data=json.dumps({'count': 3}), headers=self.get_headers(user['username'], user['password']))
+        view['count'] = 3
+        rv = self.client.post(path='/view', data=json.dumps(view), headers=self.get_headers(user['username'], user['password']))
         self.assertEqual(rv.status_code, 400)
 
         # create subviews

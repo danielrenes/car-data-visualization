@@ -1,0 +1,19 @@
+{
+  "datatype": {
+    "datatype": "EnumeratedDataType",
+    "name": "selected gear",
+    "enum": ["Reverse", "Neutral", "1th gear", "2nd gear", "3rd gear", "4th gear", "5th gear", "6th gear"],
+    "current": "Neutral",
+    "unit": ""
+  },
+  "scenario": [
+    {
+      "duration": 3,
+      "step_or_value": "1th gear"
+    },
+    {
+      "duration": 10,
+      "step_or_value": "2nd gear"
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*
+
 import unittest
 
 from data_visualization import create_app, db
@@ -44,18 +46,21 @@ class BaseTest(unittest.TestCase):
                 'name': 'temperature',
                 'min_value': -50,
                 'max_value': 50,
+                'unit': '°C',
                 'user_id': 1
             },
             {
                 'name': 'humidity',
                 'min_value': 0,
                 'max_value': 100,
+                'unit': '%',
                 'user_id': 1
             },
             {
                 'name': 'pressure',
                 'min_value': 0,
                 'max_value': 10000,
+                'unit': 'Pa',
                 'user_id': 2
             }
         ]
@@ -119,12 +124,14 @@ class BaseTest(unittest.TestCase):
                 'name': 'view1',
                 'count': 2,
                 'refresh_time': 10,
-                'user_id': 1
+                'user_id': 1,
+                'type': 'normal'
             },
             {
                 'name': 'view2',
                 'count': 1,
                 'refresh_time': 60,
-                'user_id': 2
+                'user_id': 2,
+                'type': 'normal'
             }
         ]

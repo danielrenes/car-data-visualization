@@ -1,0 +1,16 @@
+{
+  "datatype": {
+    "datatype": "NumericDataType",
+    "name": "percentage",
+    "min": 0,
+    "max": 100,
+    "current": 0,
+    "unit": "%"
+  },
+  "scenario": [
+    {
+      "duration": 13,
+      "step_or_value": 0
+    }
+  ]
+}

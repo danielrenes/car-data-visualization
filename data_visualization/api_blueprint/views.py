@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 from . import api
 from .. import db
-from ..models import View
+from ..models import ViewWrapper
 from ..queries import query_all_views, query_get_view_by_id
 
 @api.route('/views', methods=['GET'])
@@ -19,7 +19,7 @@ def get_view(id):
 
 @api.route('/view', methods=['POST'])
 def add_view():
-    view = View.from_dict(json.loads(request.data))
+    view = ViewWrapper.from_dict(json.loads(request.data))
     db.session.add(view)
     try:
         db.session.commit()

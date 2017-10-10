@@ -135,6 +135,7 @@ class Category(db.Model):
     name = db.Column(db.String(20), unique=True, nullable=False)
     min_value = db.Column(db.Integer, nullable=False)
     max_value = db.Column(db.Integer, nullable=False)
+    unit = db.Column(db.String(8), default='')
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
@@ -146,6 +147,7 @@ class Category(db.Model):
             'name': self.name,
             'min_value': self.min_value,
             'max_value': self.max_value,
+            'unit': self.unit,
             'links': {
                 'self': url_for('api.get_category', id=self.id),
                 'form_add': url_for('forms.add_category_form', user_id=self.user_id),
@@ -158,7 +160,7 @@ class Category(db.Model):
     def from_dict(data):
         if data is None:
             abort(400)
-        legal_keys = ['name', 'min_value', 'max_value', 'user_id']
+        legal_keys = ['name', 'min_value', 'max_value', 'unit', 'user_id']
         data_keys = data.keys()
         check_keys(legal_keys, data_keys)
         categ = Category()
@@ -308,6 +310,11 @@ class Subview(db.Model):
             setattr(subview, key, data[key])
         return subview
 
+view_types = {
+    'normal',
+    'preconfigured'
+}
+
 class View(db.Model):
     __tablename__ = 'views'
 
@@ -316,6 +323,7 @@ class View(db.Model):
     name = db.Column(db.String(20), nullable=False)
     count = db.Column(db.Integer, nullable=False)
     refresh_time = db.Column(db.Integer, nullable=False)
+    type = db.Column(db.String(20), default='normal')
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
@@ -352,6 +360,7 @@ class View(db.Model):
             'name': self.name,
             'count': self.count,
             'refresh_time': self.refresh_time,
+            'type': self.type,
             'links': {
                 'self': url_for('api.get_view', id=self.id),
                 'icon': url_for('static', filename='icons/'+self.icon),
@@ -381,3 +390,90 @@ class View(db.Model):
         for key in data_keys:
             setattr(view, key, data[key])
         return view
+
+class PredefinedConfiguration(db.Model):
+    __tablename__ = 'predefined_configurations'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    configuration = db.Column(db.String(4096), nullable=False)
+
+    preconfigured_views = db.relationship('PreconfiguredView', backref='predfinedconfiguration', lazy='dynamic', cascade='all, delete-orphan')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'configuration': self.configuration,
+            'links': {
+                'self': url_for('api.get_predefined_config', id=self.id),
+                'preconfigured_views': [url_for('api.get_view', id=preconfigured_view.id) for preconfigured_view in self.preconfigured_views]
+            }
+        }
+
+    @staticmethod
+    def from_dict(data):
+        if data is None:
+            abort(400)
+        legal_keys = ['configuration']
+        data_keys = data.keys()
+        check_keys(legal_keys, data_keys)
+        predefined_configuration = PredefinedConfiguration()
+        for key in data_keys:
+            setattr(predefined_configuration, key, data[key])
+        return predefined_configuration
+
+class PreconfiguredView(db.Model):
+    __tablename__ = 'preconfigured_views'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    name = db.Column(db.String(20), nullable=False)
+    refresh_time = db.Column(db.Integer, default=60)
+    type = db.Column(db.String(20), default='preconfigured')
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    predefined_configuration_id = db.Column(db.Integer, db.ForeignKey('predefined_configurations.id'), nullable=False)
+
+    @property
+    def icon(self):
+        return '1x1.svg'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'refresh_time': self.refresh_time,
+            'type': self.type,
+            'preconfiguration_id': self.predefined_configuration_id,
+            'links': {
+                'self': url_for('api.get_view', id=self.id),
+                'predefined_configuration': url_for('api.get_predefined_config', id=self.predefined_configuration_id),
+                'icon': url_for('static', filename='icons/'+self.icon),
+                'charts_init': url_for('api.get_preconfigured_skeleton', view_id=self.id),
+                'charts_refresh': url_for('api.refresh_preconfigured', view_id=self.id)
+            }
+        }
+
+    @staticmethod
+    def from_dict(data):
+        if data is None:
+            abort(400)
+        legal_keys = ['name', 'predefined_configuration_id', 'user_id']
+        data_keys = data.keys()
+        check_keys(legal_keys, data_keys)
+        preconfigured_view = PreconfiguredView()
+        for key in data_keys:
+            setattr(preconfigured_view, key, data[key])
+        return preconfigured_view
+
+class ViewWrapper(object):
+    @staticmethod
+    def from_dict(data):
+        if data['type'] == 'normal':
+            data.pop('type')
+            return View.from_dict(data)
+        elif data['type'] == 'preconfigured':
+            data.pop('type')
+            return PreconfiguredView.from_dict(data)
+        else:
+            abort(400)

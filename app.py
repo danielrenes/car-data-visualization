@@ -2,6 +2,8 @@
 
 import os
 
+import click
+
 from data_visualization import create_app, db
 from data_visualization.utils import create_chartconfigs
 
@@ -43,8 +45,28 @@ def debug_with_datafactory():
     except KeyboardInterrupt:
         datafactory_proc.kill()
 
+@app.cli.command('debug-with-datareplay', help='Start in debug mode with datareplay.')
+def debug_with_datareplay():
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        create_chartconfigs()
+        from data_visualization.models import User
+        User.generate_fake_user('Fake User', 'fakeemail@localhost.loc', 'fakepassword')
+    import subprocess
+    datareplay_proc = subprocess.Popen(['python', './datareplay.py'])
+    try:
+        app.run(debug=True)
+    except KeyboardInterrupt:
+        datareplay_proc.kill()
+
 @app.cli.command('tests', help='Run unittests.')
-def tests():
+@click.option('--name', '-n')
+def tests(name):
     import unittest
-    tests = unittest.TestLoader().discover('tests')
+    if name:
+        name = 'tests.' + name
+        tests = unittest.TestLoader().loadTestsFromName(name)
+    else:
+        tests = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=2).run(tests)

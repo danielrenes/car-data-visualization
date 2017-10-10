@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#-*- coding: utf-8 -*
 
 import httplib
 import json
@@ -19,6 +20,7 @@ sensors = [
         'category':   'temp',
         'location':   'Budapest',
         'ipv4_addr':  '127.0.0.1',
+        'unit':       '°C',
         'min_value':  -20,
         'max_value':  50,
         'interval':   15
@@ -26,6 +28,7 @@ sensors = [
     {
         'name':       'virttemp1',
         'category':   'temp',
+        'unit':       '°C',
         'min_value':  -10,
         'max_value':  40,
         'interval':   20
@@ -33,7 +36,8 @@ sensors = [
     {
         'name':       'virthumi0',
         'category':   'humi',
-        'location':   'Budapest'
+        'location':   'Budapest',
+        'unit':       '%'
     }
 ]
 
@@ -42,19 +46,22 @@ views = [
         'name':         'virtview0',
         'count':        1,
         'refresh_time': 20,
-        'user_id':      1
+        'user_id':      1,
+        'type':         'normal'
     },
     {
         'name':         'virtview1',
         'count':        2,
         'refresh_time': 10,
-        'user_id':      1
+        'user_id':      1,
+        'type':         'normal'
     },
     {
         'name':         'virtview2',
         'count':        4,
         'refresh_time': 30,
-        'user_id':      1
+        'user_id':      1,
+        'type':         'normal'
     }
 ]
 
@@ -124,10 +131,11 @@ class RegisterException(Exception):
     pass
 
 class VirtualSensor(threading.Thread):
-    def __init__(self, category_name, name, location=None, ipv4_addr=None, min_value=0, max_value=100, interval=10, daemon=True):
+    def __init__(self, category_name, name, location=None, ipv4_addr=None, unit='', min_value=0, max_value=100, interval=10, daemon=True):
         super(VirtualSensor, self).__init__()
         self.setDaemon(daemon)
         self.interval = interval
+        self.unit = unit
         self.min = min_value
         self.max = max_value
         conn = self.create_connection()
@@ -137,7 +145,7 @@ class VirtualSensor(threading.Thread):
             conn.close()
             raise
 
-    def random_value(self):
+    def next_value(self):
         rand_float = random.uniform(self.min, self.max)
         rand_float_0_001 = float('{0:.3f}'.format(rand_float))
         return rand_float_0_001
@@ -169,7 +177,8 @@ class VirtualSensor(threading.Thread):
 
         if category_id is None:
             # register its category
-            conn.request('POST', '/category', json.dumps({'name': category_name, 'min_value': self.min, 'max_value': self.max, 'user_id': 1}), headers)
+            conn.request('POST', '/category', \
+                json.dumps({'name': category_name, 'unit': self.unit, 'min_value': self.min, 'max_value': self.max, 'user_id': 1}), headers)
             resp = conn.getresponse()
             if resp.status != 201:
                 raise RegisterException('Could not register category')
@@ -197,21 +206,20 @@ class VirtualSensor(threading.Thread):
 
         return sensor_id
 
-    def send_data(self):
+    def send_data(self, endpoint):
         conn = self.create_connection()
-        val = self.random_value()
-        conn.request('POST', '/data', json.dumps(self.build_data(self.random_value())), headers)
+        conn.request('POST', endpoint, json.dumps(self.build_data(self.next_value())), headers)
         conn.getresponse()
         conn.close()
 
     def run(self):
         while True:
-            self.send_data()
+            self.send_data('/data')
             time.sleep(self.interval)
 
 class VirtualAdmin(object):
-    @classmethod
-    def execute(cls, admin_task):
+    @staticmethod
+    def execute(admin_task):
         method = admin_task['method']
         path = admin_task['path']
         data = json.dumps(admin_task['data'])
@@ -220,54 +228,67 @@ class VirtualAdmin(object):
         conn.getresponse()
         conn.close()
 
-def ping():
-    conn = httplib.HTTPConnection(host='localhost', port=5000)
-    try:
-        conn.request('HEAD', '')
-    except IOError:
+class Runner(object):
+    def __init__(self):
+        self.sensor_threads = []
+
+    def ping(self):
+        conn = httplib.HTTPConnection(host='localhost', port=5000)
+        try:
+            conn.request('HEAD', '')
+        except IOError:
+            conn.close()
+            return False
+        is_available = conn.getresponse().status == 200
         conn.close()
-        return False
-    is_available = conn.getresponse().status == 200
-    conn.close()
-    return is_available
+        return is_available
+
+    def create_sensor_threads(self):
+        for sensor in sensors:
+            name = get(sensor, 'name')
+            category = get(sensor, 'category')
+            location = get(sensor, 'location')
+            ipv4_addr = get(sensor, 'ipv4_addr')
+            unit = get(sensor, 'unit', '')
+            min_value = get(sensor, 'min_value', 0)
+            max_value = get(sensor, 'max_value', 100)
+            interval = get(sensor, 'interval', 10)
+            self.sensor_threads.append(VirtualSensor(name=name, category_name=category, location=location, \
+                ipv4_addr=ipv4_addr, unit=unit, min_value=min_value, max_value=max_value, interval=interval))
+
+    def create_admin_tasks(self):
+        return create_admin_tasks({
+            'POST': [
+                {
+                    '/view':    views
+                },
+                {
+                    '/subview': subviews
+                }
+            ]
+        })
+
+    def run(self):
+        while not self.ping():
+            time.sleep(1)
+        time.sleep(1)
+
+        # user is created in app when 'debug-with-datafactory' command is selected
+
+        self.create_sensor_threads()
+
+        for admin_task in self.create_admin_tasks():
+            VirtualAdmin.execute(admin_task)
+
+        for sensor_thread in self.sensor_threads:
+            sensor_thread.start()
+
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            pass
 
 if __name__ == '__main__':
-    while not ping():
-        time.sleep(1)
-    time.sleep(1)
-
-    # user is created in app when 'debug-with-datafactory' command is selected
-
-    sensor_threads = []
-
-    for sensor in sensors:
-        name = get(sensor, 'name')
-        category = get(sensor, 'category')
-        location = get(sensor, 'location')
-        ipv4_addr = get(sensor, 'ipv4_addr')
-        min_value = get(sensor, 'min_value', 0)
-        max_value = get(sensor, 'max_value', 100)
-        interval = get(sensor, 'interval', 10)
-        sensor_threads.append(VirtualSensor(name=name, category_name=category, location=location, \
-            ipv4_addr=ipv4_addr, min_value=min_value, max_value=max_value, interval=interval))
-
-    for admin_task in create_admin_tasks({
-        'POST': [
-            {
-                '/view':    views
-            },
-            {
-                '/subview': subviews
-            }
-        ]
-    }):
-        VirtualAdmin.execute(admin_task)
-
-    for sensor_thread in sensor_threads:
-        sensor_thread.start()
-
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        pass
+    runner = Runner()
+    runner.run()

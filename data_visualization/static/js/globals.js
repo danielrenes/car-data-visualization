@@ -17,6 +17,7 @@ var sublinks = [];
 var last_link = null;
 var link_index = null;
 
+var view_type = null;
 var interval_id = null;
 var chart_data_lengths = {};
 var refresh_time = null;
