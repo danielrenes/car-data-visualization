@@ -60,6 +60,24 @@ def debug_with_datareplay():
     except KeyboardInterrupt:
         datareplay_proc.kill()
 
+@app.cli.command('cleanup', help='Delete all generated files.')
+def cleanup():
+    data_definitions_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data_definitions')
+    generated_files = {
+        data_definitions_dir: ['parking_space']
+    }
+    delete_files = []
+    for basedir, filenames in generated_files.iteritems():
+        for _file in os.listdir(basedir):
+            if os.path.isfile(os.path.join(basedir, _file)):
+                for filename in filenames:
+                    if _file.startswith(filename):
+                        delete_files.append(os.path.join(basedir, _file))
+    print 'Files removed:'
+    for delete_file in delete_files:
+        os.remove(delete_file)
+        print delete_file
+
 @app.cli.command('tests', help='Run unittests.')
 @click.option('--name', '-n')
 def tests(name):

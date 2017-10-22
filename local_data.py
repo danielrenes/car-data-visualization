@@ -8,6 +8,9 @@ import threading
 
 from data_visualization.chartjs import chart_types
 
+basedir = (os.path.dirname(os.path.realpath(__file__)))
+data_definitions_dir = os.path.join(basedir, 'data_definitions')
+
 class DataType(object):
     def __init__(self, _name):
         self.name = _name
@@ -185,7 +188,6 @@ class DataGenerator(object):
                     print '{0}: {1}'.format(self.datatype.name, value)
 
 def create_datagenerators():
-    data_definitions_dir = './data_definitions'
     data_generators = []
 
     for _file in os.listdir(data_definitions_dir):
