@@ -257,7 +257,3 @@ var datareplay = function(element_id, data, chart_data_lengths) {
     chart_data_lengths[element_id] = index;
   }, 1000);
 };
-
-// TODO
-// #1: seems like the datas start over
-// #2: about 30 seconds in new gauges appear on the screen (weird)
