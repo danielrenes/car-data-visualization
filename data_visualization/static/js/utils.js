@@ -24,7 +24,7 @@ var get_token = function() {
     console.log("token expires at: " + expiration);
     user["expiration"] = expiration;
   });
-}
+};
 
 /**
  * Returns the username:password or token credidentials to be able to communicate with the API.
@@ -43,7 +43,7 @@ var get_authorization = function() {
   } else {
     return "Basic " + get_username_password();
   }
-}
+};
 
 /**
  * Returns username:password credidentials to be able to communicate with the API.
@@ -62,14 +62,14 @@ var get_username_password = function() {
     user["password"] = password;
   }
   return window.btoa(username + ":" + password);
-}
+};
 
 /**
  * Load the links associated with the user account.
-*/
+ */
 var get_user_links = function() {
   $.ajax({
-    url: "/user",
+    url: $SCRIPT_ROOT + "/user",
     type: "GET",
     datatype: "json",
     beforeSend: function(request) {
@@ -78,13 +78,13 @@ var get_user_links = function() {
   }).done(function(data) {
     user_links = data["links"];
   });
-}
+};
 
 /**
  * Find cookie value for the given search key.
  * @param {String} searchKey key for the cookie
  * @return {String} the cookie value for the key or null if there is no cookie with the given key
-*/
+ */
 var get_cookie = function(searchKey) {
   let cookies = document.cookie.split(";")
   for (let i = 0; i < cookies.length; i++) {
@@ -107,7 +107,7 @@ var get_cookie = function(searchKey) {
  * @param {Boolean} push_links replace links
  * @param {Boolean} use_markers mark resolvable fields
  * @return {Array} array with the html table, the markers for the resolvable fields and paths for the requests to resolve the fields
-*/
+ */
 var json_to_html_table = function(data, message, modifiable, push_links, use_markers) {
   if (push_links) {
     if (link_index == null) {
@@ -203,7 +203,7 @@ var json_to_html_table = function(data, message, modifiable, push_links, use_mar
  * Create HTML breadcrumb with Bulma CSS styles from JSON data.
  * @param {String} data JSON data
  * @return {String} HTMl breadcrumb
-*/
+ */
 var json_to_breadcrumb = function(data) {
   links.length = 0;
 

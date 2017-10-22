@@ -92,3 +92,8 @@ def query_all_predefined_configs():
 @success_or_abort
 def query_get_predefined_config_by_id(id):
     return PredefinedConfiguration.query.filter(PredefinedConfiguration.id==id).first()
+
+@success_or_abort
+def query_all_parking_spaces(user_id):
+    return Sensor.query.join(Category, Sensor.category_id==Category.id).join(User, User.id==Category.user_id)\
+        .filter(User.id==user_id, Sensor.name.like('parking_space%')).order_by(Sensor.id).all()

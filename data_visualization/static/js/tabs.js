@@ -160,6 +160,10 @@ var load_subviews = function(view_idx) {
   }
 };
 
+var load_map = function() {
+  
+};
+
 var load_tab = function(name) {
   switch (name) {
     case 'categories':
@@ -172,6 +176,9 @@ var load_tab = function(name) {
       break;
     case 'views':
       load_views();
+      break;
+    case 'map':
+      load_map();
       break;
     default:
       break;

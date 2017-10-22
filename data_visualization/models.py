@@ -87,6 +87,7 @@ class User(UserMixin, db.Model):
                 'form_edit': url_for('forms.edit_user_form'),
                 'categories': [url_for('api.get_category', id=categ.id) for categ in self.categories],
                 'views': [url_for('api.get_view', id=view.id) for view in self.views],
+                'parking_spaces': url_for('api.get_parking_spaces'),
                 '_fallback': {
                     'categories': {
                         'form_add': url_for('forms.add_category_form', user_id=self.id),

@@ -47,13 +47,14 @@ def debug_with_datafactory():
 
 @app.cli.command('debug-with-datareplay', help='Start in debug mode with datareplay.')
 def debug_with_datareplay():
+    import subprocess
+    subprocess.call(['python', './generate_parkingspace_datadefinitions.py', '-c', '10', '-t', '500', '-a', '47.475382', '-o', '19.056040', '-r', '0.015'])
     with app.app_context():
         db.drop_all()
         db.create_all()
         create_chartconfigs()
         from data_visualization.models import User
         User.generate_fake_user('Fake User', 'fakeemail@localhost.loc', 'fakepassword')
-    import subprocess
     datareplay_proc = subprocess.Popen(['python', './datareplay.py'])
     try:
         app.run(debug=True)
