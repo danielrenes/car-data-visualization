@@ -151,15 +151,27 @@ class DataGenerator(object):
         self.name = os.path.splitext(os.path.split(filepath)[1])[0]
         self.datatype = from_json(json.dumps(obj['datatype']))
         self.scenario = Scenario.from_json(json.dumps(obj['scenario']))
+        self.process_optional(obj)
+
+    def process_optional(self, obj):
+        if not 'optional' in obj:
+            self.optional = None
+            return
+        self.optional = {}
+        for key, value in obj['optional'].iteritems():
+            self.optional[key] = value
 
     def map_to_sensor(self):
-        return {
+        mapped = {
             'name': self.name,
             'category': self.datatype.name,
             'min_value': self.datatype.min if isinstance(self.datatype, NumericDataType) else 0,
             'max_value': self.datatype.max if isinstance(self.datatype, NumericDataType) else 0,
             'unit': self.datatype.unit if isinstance(self.datatype, NumericDataType) else ''
         }
+        if self.optional:
+            mapped.update(self.optional)
+        return mapped
 
     def map_to_datas(self):
         return [value for value in self.run(silent=True)]
