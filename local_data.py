@@ -192,7 +192,9 @@ class DataGenerator(object):
                 if isinstance(self.datatype, NumericDataType):
                     value = self.datatype.current
                 elif isinstance(self.datatype, EnumeratedDataType):
-                    value = self.datatype.enum.values[self.datatype.current]
+                    # TODO: good solution would be sending the enum values over to the client -> server and client side modifications needed
+                    # value = self.datatype.enum.values[self.datatype.current]
+                    value = self.datatype.current
                 if silent:
                     yield value
                 else:
@@ -214,7 +216,7 @@ def map_to_models(data_generators):
     for data_generator in data_generators:
         sensors.append(data_generator.map_to_sensor())
         datas.append(data_generator.map_to_datas())
-    return (sensors[0:4], datas[0:4])
+    return (sensors, datas)
 
 if __name__ == '__main__':
     data_generators = create_datagenerators()

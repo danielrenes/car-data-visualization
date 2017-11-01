@@ -26,6 +26,8 @@ def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--count', type=int, required=True, help='the number of parking space data definitions to create')
     parser.add_argument('-t', '--time', type=int, required=True, help='the time interval in seconds for the data definitions')
+    parser.add_argument('-n', '--min', type=int, required=True, help='the minimum seconds when generating random state')
+    parser.add_argument('-x', '--max', type=int, required=True, help='the maximum seconds when generating random state')
     parser.add_argument('-a', '--latitude', type=float, required=True, help='the latitude of the center of the circle in degrees')
     parser.add_argument('-o', '--longitude', type=float, required=True, help='the longitude of the center of the circle in degrees')
     parser.add_argument('-r', '--radius', type=float, required=True, help='the radius of the circle in degrees')
@@ -36,14 +38,14 @@ def random_location(latitude, longitude, radius):
     random_longitude = random.uniform(longitude, longitude + radius)
     return '{0},{1}'.format(random_latitude, random_longitude)
 
-def generate(time, latitude, longitude, radius, filename):
+def generate(time, min_rand, max_rand, latitude, longitude, radius, filename):
     generated = []
     values = ['Free', 'Occupied']
     current_time = 0
     current_value = ''
     sum_time = 0
     while sum_time < time:
-        temp_time = random.randint(60, 120)
+        temp_time = random.randint(min_rand, max_rand)
         if sum_time + temp_time > time:
             temp_time = time - sum_time
         temp_value = random.choice(values)
@@ -67,9 +69,9 @@ def generate(time, latitude, longitude, radius, filename):
 
 def run():
     args = cli().parse_args()
-    count, time, latitude, longitude, radius = args.count, args.time, args.latitude, args.longitude, args.radius
+    count, time, min_rand, max_rand, latitude, longitude, radius = args.count, args.time, args.min, args.max, args.latitude, args.longitude, args.radius
     for i in xrange(count):
-        generate(time, latitude, longitude, radius, 'parking_space_{0}.json'.format(i))
+        generate(time, min_rand, max_rand, latitude, longitude, radius, 'parking_space_{0}.json'.format(i))
 
 if __name__ == '__main__':
     run()

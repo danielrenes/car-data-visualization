@@ -161,10 +161,63 @@ var load_subviews = function(view_idx) {
 };
 
 var load_map = function() {
-  
+  map_last_index = 0;
+
+  $.ajax({
+    url: user_links["map_init"],
+    type: "GET",
+    datatype: "json",
+    beforeSend: function(request) {
+      request.setRequestHeader("Authorization", get_authorization());
+    }
+  }).done(function(data) {
+    $("#user_data").empty();
+    $("#user_data").append("<div style='width: 800px; height: 500px; margin-left: auto; margin-right: auto' id='map'></div>");
+    map = L.map("map").setView([data["center"]["latitude"], data["center"]["longitude"]], data["zoom"]);
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    interval_id = setInterval(function() {
+      refresh_data = {};
+      $.ajax({
+        url: user_links["map_refresh"],
+        type: "GET",
+        datatype: "json",
+        data: {"map": map_last_index},
+        beforeSend: function(request) {
+          request.setRequestHeader("Authorization", get_authorization());
+        }
+      }).done(function(data) {
+        let map_last_index_set = false;
+        let replay_data = {};
+        for (let key in data) {
+          if (!map_last_index_set) {
+            map_last_index += data[key].length;
+            map_last_index_set = true;
+          }
+          replay_data[key] = [];
+          for (let i = 0; i < data[key].length; i++) {
+            replay_data[key].push(data[key][i]["value"]);
+          }
+        }
+        if (replay_interval_id != null) {
+          clearInterval(replay_interval_id);
+          replay_interval_id = null;
+        }
+        setTimeout(function() {
+          replay(replay_data);
+        }, 0);
+      });
+    }, 60000);
+  });
 };
 
 var load_tab = function(name) {
+  if (replay_interval_id != null) {
+    clearInterval(replay_interval_id);
+    replay_interval_id = null;
+  }
   switch (name) {
     case 'categories':
       load_categories();
@@ -179,6 +232,7 @@ var load_tab = function(name) {
       break;
     case 'map':
       load_map();
+      link_index = null;
       break;
     default:
       break;

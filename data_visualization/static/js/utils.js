@@ -251,7 +251,7 @@ var json_to_breadcrumb = function(data) {
 var datareplay = function(element_id, data, chart_data_lengths) {
   let index = 0;
   let gauge = document.gauges.get(element_id);
-  setInterval(function() {
+  replay_interval_id = setInterval(function() {
     gauge.value = data[index]["value"];
     index++;
     chart_data_lengths[element_id] = index;

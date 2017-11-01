@@ -23,3 +23,8 @@ var chart_data_lengths = {};
 var refresh_time = null;
 
 var popup_keep_open = false;
+
+var map = null;
+var map_last_index = 0;
+
+var replay_interval_id = null;

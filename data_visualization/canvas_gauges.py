@@ -37,7 +37,8 @@ class Ticks(object):
         ten_pow = 1
         while _range > ten_pow and _range % ten_pow == 0:
             ten_pow *= 10
-        ten_pow /= 10
+        if ten_pow >= 10:
+            ten_pow /= 10
         major_step = ten_pow
         if _range / major_step > 10:
             while _range % major_step == 0:
@@ -74,6 +75,8 @@ class CanvasGauge(object):
     def generate_data_highlights(self):
         _from = -len(self.ticks.major) / 3
         _to = -1
+        if _from == 0 or len(self.ticks.major) < 2:
+            return None
         if _from == -1:
             _from = -2
         return DataHighlights(self.ticks.major[_from], self.ticks.major[_to], Color(204, 0, 0, 0.8))
@@ -83,6 +86,7 @@ class CanvasGauge(object):
         config.append('<canvas id="{0}" data-type="{1}"'.format(self.canvas_id, self.data_type))
         config.append(self.basic.build())
         config.append(self.ticks.build())
-        config.append(self.data_highlights.build())
+        if self.data_highlights:
+            config.append(self.data_highlights.build())
         config.append('></canvas>')
         return ' '.join(config)

@@ -348,6 +348,10 @@ var fn_icon_play = function() {
                 chart_data_lengths[$this.attr("id")] = data_length;
                 window[$this.attr("id")].update();
               } else if (view_type == "preconfigured") {
+                if (replay_interval_id != null) {
+                  clearInterval(replay_interval_id);
+                  replay_interval_id = null;
+                }
                 setTimeout(function() {
                   datareplay($this.attr("id"), refresh_data, chart_data_lengths);
                 }, 0);
