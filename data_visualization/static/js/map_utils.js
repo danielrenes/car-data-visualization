@@ -3,23 +3,13 @@ const color_occupied = "#f02";
 var heatmap_spots = [];
 
 /**
- * Create one grid element.
- * @param {Integer} lat latitude of the top left corner for the grid element
- * @param {Integer} lon longitude of the top left corener for the grid element
- * @param {String} color color of the grid element
- */
-var grid = function(lat, lon, color) {
-  
-};
-
-/**
  * Draw a heatmap spot to the map.
  * @param {Integer} lat latitude of the drawing center
  * @param {Integer} lon longitude of the drawing center
  * @param {Integer} radius radius of the circle
  * @param {String} color color of the circle
  */
-var heatmap = function(lat, lon, radius, color) {
+var heatmap_spot = function(lat, lon, radius, color) {
   heatmap_spots.push(L.circle([lat, lon], {
     color: color,
     fillColor: color,
@@ -28,21 +18,88 @@ var heatmap = function(lat, lon, radius, color) {
   }).addTo(map));
 };
 
+/**
+ * Draw a heatmap.
+ * @param {Integer} lat latitude of the drawing center
+ * @param {Integer} lon longitude of the drawing center
+ * @param {Integer} radiuses radiuses of the circles
+ * @param {String} colores colors of the circles
+ */
+var heatmap = function(lat, lon, radiuses, colors) {
+  for (let i = 0; i < radiuses.length; i++) {
+    heatmap_spot(lat, lon, radiuses[i], colors[i]);
+  }
+}
+
 var replay = function(data) {
   let index = 0;
   replay_interval_id = setInterval(function() {
-    for (let i = 0; i < heatmap_spots.length; i++) {
-      map.removeLayer(heatmap_spots[i]);
-    }
-    heatmap_spots.length = 0;
+    let lat_center = 0;
+    let lon_center = 0;
+    let divider = 0;
     for (let key in data) {
       let splitted = key.split(",");
-      let lat = splitted[0];
-      let lon = splitted[1];
-      let color = data[key][index] == 0 ? color_free : color_occupied;
-      console.log(lat + "," + lon + ": " + data[key][index] + " => " + color);
-      heatmap(lat, lon, 10, color);
+      let lat = parseFloat(splitted[0]);
+      let lon = parseFloat(splitted[1]);
+      lat_center += lat;
+      lon_center += lon;
+      divider += 1;
     }
+    lat_center /= divider;
+    lon_center /= divider;
+    let radiuses = [];
+    let colors = [];
+    let order = [];
+    let item_index = 0;
+    for (let key in data) {
+      let splitted = key.split(",");
+      let lat = parseFloat(splitted[0]);
+      let lon = parseFloat(splitted[1]);
+      radiuses.push(distance_between(lat_center, lon_center, lat, lon));
+      colors.push(data[key][index] == 0 ? color_free : color_occupied);
+      order.push(item_index);
+      item_index += 1;
+    }
+    order.sort(function(a, b) {
+      return radiuses[a] < radiuses[b] ? 1 : radiuses[a] > radiuses[b] ? -1 : 0;
+    });
+    radiuses = order_by_index_array(radiuses, order);
+    colors = order_by_index_array(colors, order);
+    heatmap(lat_center, lon_center, radiuses, colors);
     index++;
   }, 1000);
 };
+
+/**
+ * Calculate distance between two geographical location.
+ * @param {float} lat1 latitude of the first geolocation
+ * @param {float} lon1 longitude of the first geolocation
+ * @param {float} lat2 latitude of the second geolocation
+ * @param {float} lon2 longitude of the second geolocation
+ * @return {float} distance between the two geolocations in meters
+ */
+var distance_between = function (lat1, lon1, lat2, lon2) {
+    var earth_radius = 6378.137;
+    var diff_lat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
+    var diff_lon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
+    var a = Math.sin(diff_lat/2) * Math.sin(diff_lat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(diff_lon/2) * Math.sin(diff_lon/2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var d = earth_radius * c;
+    return d * 1000;
+}
+
+/**
+ * Order the given array based on the order of the indexes.
+ * @param {Array} array the array to be sorted
+ * @param {Array} order the ordered indexes
+ * @return {Array} the ordered array
+ */
+var order_by_index_array = function(array, order) {
+  let ordered = [];
+  for (let i = 0; i < order.length; i++) {
+    ordered.push(array[order[i]]);
+  }
+  return ordered;
+}

@@ -48,7 +48,7 @@ def debug_with_datafactory():
 @app.cli.command('debug-with-datareplay', help='Start in debug mode with datareplay.')
 def debug_with_datareplay():
     import subprocess
-    subprocess.call(['python', './generate_parkingspace_datadefinitions.py', '-c', '10', '-t', '200', '-n', '4', '-x', '8', '-a', '47.475382', '-o', '19.056040', '-r', '0.015'])
+    subprocess.call(['python', './generate_parkingspace_datadefinitions.py', '-c', '20', '-t', '120', '-n', '4', '-x', '8', '-a', '47.475382', '-o', '19.056040', '-r', '0.0005'])
     with app.app_context():
         db.drop_all()
         db.create_all()
