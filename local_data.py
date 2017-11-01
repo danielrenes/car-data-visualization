@@ -133,17 +133,6 @@ class Scenario(object):
         scenario = Scenario(json.loads(_json))
         return scenario
 
-# def create_default():
-#     vehicle_speed = NumericDataType('vehicle_speed', 0, 200, 'km/h')
-#     engine_rpm = NumericDataType('engine_rpm', 0, 8000, 'rpm')
-#     selected_gear = EnumeratedDataType('selected_gear', ['Reverse', 'Neutral', 'First', 'Second', 'Third', 'Forth', 'Fifth', 'Sixth'])
-#     coolant_temperature = NumericDataType('coolant_temperature', -30, 150, '°C')
-#     oil_temperature = NumericDataType('oil_temperature', -30, 150, '°C')
-#     throttle_position = NumericDataType('throttle_position', 0, 45, 'deg')
-#     brake_position = NumericDataType('brake_position', 0, 45, 'deg')
-#     clutch_position = NumericDataType('clutch_position', 0, 45, 'deg')
-#     battery_voltage = NumericDataType('battery_voltage', 11, 14, 'V')
-
 class DataGenerator(object):
     def __init__(self, filepath):
         with open(filepath) as f:
