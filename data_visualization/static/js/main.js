@@ -17,4 +17,5 @@ $(document).ready(function() {
   $(document.body).on("mouseenter", ".mod_popup", fn_enter_mod_popup);
   $(document.body).on("mouseleave", ".mod_popup", fn_leave_mod_popup);
   $(document.body).on("click", "span.icon.play", fn_icon_play);
+  $(document.body).on("click", "canvas[data-type$='gauge']", fn_gauge_data);
 });

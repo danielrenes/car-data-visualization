@@ -28,3 +28,5 @@ var map = null;
 var map_last_index = 0;
 
 var replay_interval_id = null;
+
+var dynamic_view = null;

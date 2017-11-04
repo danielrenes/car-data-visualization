@@ -5,8 +5,8 @@ from sqlalchemy.exc import IntegrityError
 
 from . import api
 from .. import db
-from ..models import ViewWrapper
-from ..queries import query_all_views, query_get_view_by_id
+from ..models import ViewWrapper, View, Subview
+from ..queries import query_all_views, query_get_view_by_id, query_get_sensor_by_name
 
 @api.route('/views', methods=['GET'])
 def get_views():
@@ -57,6 +57,48 @@ def modify_view(id):
 def remove_view(id):
     view = query_get_view_by_id(id, g.current_user.id)
     db.session.delete(view)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        abort(400)
+    return '', 204
+
+@api.route('/view/dynamic/add', methods=['GET'])
+def add_dynamic_view():
+    sensor_name = request.args.get('sensor_name')
+    sensor_id = query_get_sensor_by_name(sensor_name, g.current_user.id).id
+    view = View.from_dict({
+        'name':         'dynamic',
+        'count':        1,
+        'refresh_time': 10,
+        'user_id':      g.current_user.id
+    })
+    db.session.add(view)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        abort(400)
+    subview = Subview.from_dict({
+        'sensor_id':        sensor_id,
+        'chartconfig_id':   1,
+        'view_id':          view.id
+    })
+    db.session.add(subview)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        abort(400)
+    resp = jsonify({'view_id': view.id})
+    resp.status_code = 201
+    return resp
+
+@api.route('/view/dynamic/remove', methods=['GET'])
+def remove_dynamic_view():
+    view_id = request.args.get('view_id')
+    db.session.delete(query_get_view_by_id(view_id, g.current_user.id))
     try:
         db.session.commit()
     except IntegrityError:

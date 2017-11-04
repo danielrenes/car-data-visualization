@@ -178,38 +178,8 @@ var load_map = function() {
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    interval_id = setInterval(function() {
-      refresh_data = {};
-      $.ajax({
-        url: user_links["map_refresh"],
-        type: "GET",
-        datatype: "json",
-        data: {"map": map_last_index},
-        beforeSend: function(request) {
-          request.setRequestHeader("Authorization", get_authorization());
-        }
-      }).done(function(data) {
-        let map_last_index_set = false;
-        let replay_data = {};
-        for (let key in data) {
-          if (!map_last_index_set) {
-            map_last_index += data[key].length;
-            map_last_index_set = true;
-          }
-          replay_data[key] = [];
-          for (let i = 0; i < data[key].length; i++) {
-            replay_data[key].push(data[key][i]["value"]);
-          }
-        }
-        if (replay_interval_id != null) {
-          clearInterval(replay_interval_id);
-          replay_interval_id = null;
-        }
-        setTimeout(function() {
-          replay(replay_data);
-        }, 0);
-      });
-    }, 60000);
+    play_map();
+    interval_id = setInterval(play_map, 60000);
   });
 };
 

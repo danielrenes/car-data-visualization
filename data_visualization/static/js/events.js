@@ -48,6 +48,23 @@ var fn_select_tab = function() {
 
 var fn_close_modal = function() {
   last_link = null;
+  if (dynamic_view != null) {
+    $.ajax({
+      url: $SCRIPT_ROOT + "/view/dynamic/remove",
+      type: "GET",
+      datatype: "json",
+      data: dynamic_view,
+      beforeSend: function(request) {
+        request.setRequestHeader("Authorization", get_authorization());
+      }
+    }).done(function(data) {
+      dynamic_view = null;
+    });
+    if (interval_id != null) {
+      clearInterval(interval_id);
+      interval_id = null;
+    }
+  }
   $(".modal").removeClass("is-active");
 };
 
@@ -318,48 +335,47 @@ var fn_icon_play = function() {
         }
       }).done(function(data) {
         view_type = data["type"];
-
-        interval_id = setInterval(function() {
-          request_data = {};
-          $("canvas").each(function() {
-            let key = $(this).attr("id");
-            request_data[key] = chart_data_lengths[key];
-          });
-          $.ajax({
-            url: links[link_index]["charts_refresh"],
-            type: "GET",
-            data: request_data,
-            datatype: "json",
-            beforeSend: function(request) {
-              request.setRequestHeader("Authorization", get_authorization());
-            }
-          }).done(function(data) {
-            $("canvas").each(function() {
-              let $this = $(this);
-              let refresh_data = data[$this.attr("id")];
-              let data_length = chart_data_lengths[$this.attr("id")];
-
-              if (view_type == "normal") {
-                for (let i = 0; i < refresh_data.length; i++) {
-                  window[$this.attr("id")].data.labels[data_length] = refresh_data[i]["timestamp"];
-                  window[$this.attr("id")].data.datasets[0].data[data_length] = refresh_data[i]["value"];
-                  data_length++;
-                }
-                chart_data_lengths[$this.attr("id")] = data_length;
-                window[$this.attr("id")].update();
-              } else if (view_type == "preconfigured") {
-                if (replay_interval_id != null) {
-                  clearInterval(replay_interval_id);
-                  replay_interval_id = null;
-                }
-                setTimeout(function() {
-                  datareplay($this.attr("id"), refresh_data, chart_data_lengths);
-                }, 0);
-              }
-            });
-          });
-        }, refresh_time);
+        play_view();
+        interval_id = setInterval(play_view, refresh_time);
       });
+    });
+  });
+};
+
+var fn_gauge_data = function() {
+  $.ajax({
+    url: $SCRIPT_ROOT + "/view/dynamic/add",
+    type: "GET",
+    datatype: "json",
+    data: {
+      sensor_name: $(this).attr("id")
+    },
+    beforeSend: function(request) {
+      request.setRequestHeader("Authorization", get_authorization());
+    }
+  }).done(function(data) {
+    dynamic_view = data;
+    $.ajax({
+      url: $SCRIPT_ROOT + "/charts/" + dynamic_view["view_id"],
+      type: "GET",
+      datatype: "html",
+      beforeSend: function(request) {
+        request.setRequestHeader("Authorization", get_authorization());
+      }
+    }).done(function(data) {
+      load_modal(data);
+      $(".modal-card").css("width", "1200px");
+      $(".charts_wrap > .column").css("width", "1000px");
+      chart_data_lengths = {};
+      $("canvas[id^='chart']").each(function() {
+        chart_data_lengths[$(this).attr("id")] = 0;
+      });
+      if (interval_id != null) {
+        clearInterval(interval_id);
+        clearInterval(replay_interval_id);
+      }
+      play_chart();
+      interval_id = setInterval(play_chart, 10000);
     });
   });
 };

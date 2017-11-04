@@ -54,5 +54,6 @@ def refresh_preconfigured(view_id):
     for arg in request.args:
         last_index = int(request.args.get(arg))
         datas_since_index = query_get_sensor_by_id(query_get_sensor_by_name(arg, g.current_user.id).id, g.current_user.id).datas[last_index:]
-        refresh_data[arg] = [data.to_dict() for data in datas_since_index]
+        dataset_size = 60 if len(datas_since_index) > 60 else len(datas_since_index)
+        refresh_data[arg] = [data.to_dict() for data in datas_since_index[:dataset_size]]
     return jsonify(refresh_data)
