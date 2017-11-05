@@ -9,12 +9,44 @@
   },
   "scenario": [
     {
-      "duration": 3,
-      "step_or_value": 3
+      "duration": 4,
+      "step_or_value": 10
     },
     {
-      "duration": 10,
-      "step_or_value": 2
+      "duration": 1,
+      "step_or_value": 0
+    },
+    {
+      "duration": 2,
+      "step_or_value": 10
+    },
+    {
+      "duration": 8,
+      "step_or_value": 0
+    },
+    {
+      "duration": 3,
+      "step_or_value": -10
+    },
+    {
+      "duration": 1,
+      "step_or_value": 0
+    },
+    {
+      "duration": 2,
+      "step_or_value": 15
+    },
+    {
+      "duration": 1,
+      "step_or_value": 0
+    },
+    {
+      "duration": 5,
+      "step_or_value": 6
+    },
+    {
+      "duration": 3,
+      "step_or_value": 0
     }
   ]
 }

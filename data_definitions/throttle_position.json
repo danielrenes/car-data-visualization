@@ -10,10 +10,22 @@
   "scenario": [
     {
       "duration": 1,
+      "step_or_value": 100
+    },
+    {
+      "duration": 3,
+      "step_or_value": 0
+    },
+    {
+      "duration": 1,
+      "step_or_value": -100
+    },
+    {
+      "duration": 1,
       "step_or_value": 80
     },
     {
-      "duration": 2,
+      "duration": 1,
       "step_or_value": 0
     },
     {
@@ -22,10 +34,54 @@
     },
     {
       "duration": 1,
+      "step_or_value": 0
+    },
+    {
+      "duration": 1,
       "step_or_value": 20
     },
     {
-      "duration": 8,
+      "duration": 5,
+      "step_or_value": 0
+    },
+    {
+      "duration": 1,
+      "step_or_value": -20
+    },
+    {
+      "duration": 3,
+      "step_or_value": 0
+    },
+    {
+      "duration": 1,
+      "step_or_value": 100
+    },
+    {
+      "duration": 1,
+      "step_or_value": 0
+    },
+    {
+      "duration": 1,
+      "step_or_value": -100
+    },
+    {
+      "duration": 1,
+      "step_or_value": 100
+    },
+    {
+      "duration": 4,
+      "step_or_value": 0
+    },
+    {
+      "duration": 1,
+      "step_or_value": -100
+    },
+    {
+      "duration": 1,
+      "step_or_value": 15
+    },
+    {
+      "duration": 1,
       "step_or_value": 0
     }
   ]

@@ -9,7 +9,23 @@
   },
   "scenario": [
     {
-      "duration": 13,
+      "duration": 15,
+      "step_or_value": 0
+    },
+    {
+      "duration": 1,
+      "step_or_value": 60
+    },
+    {
+      "duration": 2,
+      "step_or_value": 0
+    },
+    {
+      "duration": 1,
+      "step_or_value": -60
+    },
+    {
+      "duration": 11,
       "step_or_value": 0
     }
   ]

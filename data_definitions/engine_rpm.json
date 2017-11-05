@@ -9,16 +9,52 @@
   },
   "scenario": [
     {
+      "duration": 4,
+      "step_or_value": 2000
+    },
+    {
+      "duration": 1,
+      "step_or_value": -2000
+    },
+    {
+      "duration": 2,
+      "step_or_value": 500
+    },
+    {
+      "duration": 2,
+      "step_or_value": -2000
+    },
+    {
+      "duration": 6,
+      "step_or_value": 0
+    },
+    {
       "duration": 3,
+      "step_or_value": -500
+    },
+    {
+      "duration": 1,
+      "step_or_value": 4000
+    },
+    {
+      "duration": 2,
       "step_or_value": 1000
     },
     {
       "duration": 1,
-      "step_or_value": -1000
+      "step_or_value": -2000
     },
     {
-      "duration": 9,
-      "step_or_value": 100
+      "duration": 5,
+      "step_or_value": 500
+    },
+    {
+      "duration": 1,
+      "step_or_value": -6000
+    },
+    {
+      "duration": 2,
+      "step_or_value": 0
     }
   ]
 }
