@@ -45,7 +45,7 @@ def debug_with_datafactory():
     except KeyboardInterrupt:
         datafactory_proc.kill()
 
-@app.cli.command('debug-with-datareplay', help='Start in debug mode with datareplay.')
+@app.cli.command('demo', help='Start in debug mode with datareplay.')
 def debug_with_datareplay():
     import subprocess
     subprocess.call(['python', './generate_parkingspace_datadefinitions.py', '-c', '20', '-t', '60', '-n', '4', '-x', '8', '-a', '47.475382', '-o', '19.056040', '-r', '0.0025'])
