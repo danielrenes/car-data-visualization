@@ -34,38 +34,44 @@ var heatmap = function(lat, lon, radiuses, colors) {
 var replay = function(data) {
   let index = 0;
   replay_interval_id = setInterval(function() {
-    let lat_center = 0;
-    let lon_center = 0;
-    let divider = 0;
-    for (let key in data) {
-      let splitted = key.split(",");
-      let lat = parseFloat(splitted[0]);
-      let lon = parseFloat(splitted[1]);
-      lat_center += lat;
-      lon_center += lon;
-      divider += 1;
+    let clusters = create_clusters(data, 100);
+    for (let i = 0; i < clusters.length; i++) {
+      let cluster = clusters[i];
+      let lat_center = 0;
+      let lon_center = 0;
+      let divider = 0;
+      for (let j = 0; j < cluster.length; j++) {
+        let item = cluster[j];
+        let splitted = item[0].split(",");
+        let lat = parseFloat(splitted[0]);
+        let lon = parseFloat(splitted[1]);
+        lat_center += lat;
+        lon_center += lon;
+        divider += 1;
+      }
+      lat_center /= divider;
+      lon_center /= divider;
+      let radiuses = [];
+      let colors = [];
+      let order = [];
+      let item_index = 0;
+      for (let j = 0; j < cluster.length; j++) {
+        let item = cluster[j];
+        let splitted = item[0].split(",");
+        let lat = parseFloat(splitted[0]);
+        let lon = parseFloat(splitted[1]);
+        radiuses.push(distance_between(lat_center, lon_center, lat, lon));
+        colors.push(item[1][index] == 0 ? color_free : color_occupied);
+        order.push(item_index);
+        item_index += 1;
+      }
+      order.sort(function(a, b) {
+        return radiuses[a] < radiuses[b] ? 1 : radiuses[a] > radiuses[b] ? -1 : 0;
+      });
+      radiuses = order_by_index_array(radiuses, order);
+      colors = order_by_index_array(colors, order);
+      heatmap(lat_center, lon_center, radiuses, colors);
     }
-    lat_center /= divider;
-    lon_center /= divider;
-    let radiuses = [];
-    let colors = [];
-    let order = [];
-    let item_index = 0;
-    for (let key in data) {
-      let splitted = key.split(",");
-      let lat = parseFloat(splitted[0]);
-      let lon = parseFloat(splitted[1]);
-      radiuses.push(distance_between(lat_center, lon_center, lat, lon));
-      colors.push(data[key][index] == 0 ? color_free : color_occupied);
-      order.push(item_index);
-      item_index += 1;
-    }
-    order.sort(function(a, b) {
-      return radiuses[a] < radiuses[b] ? 1 : radiuses[a] > radiuses[b] ? -1 : 0;
-    });
-    radiuses = order_by_index_array(radiuses, order);
-    colors = order_by_index_array(colors, order);
-    heatmap(lat_center, lon_center, radiuses, colors);
     index++;
   }, 1000);
 };
@@ -102,4 +108,33 @@ var order_by_index_array = function(array, order) {
     ordered.push(array[order[i]]);
   }
   return ordered;
+}
+
+var create_clusters = function(data, distance) {
+  let clusters = [];
+  let cluster_centers = [];
+  for (let key in data) {
+    let splitted = key.split(",");
+    let lat = parseFloat(splitted[0]);
+    let lon = parseFloat(splitted[1]);
+    let i;
+    for (i = 0; i < clusters.length; i++) {
+      let cluster_center = cluster_centers[i];
+      let n_points = clusters[i].length;
+      if (distance_between(lat, lon, cluster_center[0] / n_points, cluster_center[1] / n_points) < distance) {
+        clusters[i].push([key, data[key]]);
+        cluster_centers[i][0] += lat;
+        cluster_centers[i][1] += lon;
+        break;
+      }
+    }
+    if (i == clusters.length) {
+      let cluster = [];
+      cluster.push([key, data[key]]);
+      let center = [lat, lon];
+      clusters.push(cluster);
+      cluster_centers.push(center);
+    }
+  }
+  return clusters;
 }

@@ -51,7 +51,7 @@ class ReplayRunner(Runner):
             max_value = get(sensor, 'max_value', 100)
             interval = get(sensor, 'interval', 10)
             self.sensor_threads.append(ReplaySensor(name=name, category_name=category, datas=datas[i], \
-                location=location, ipv4_addr=ipv4_addr, min_value=min_value, max_value=max_value, interval=interval))
+                location=location, ipv4_addr=ipv4_addr, unit=unit, min_value=min_value, max_value=max_value, interval=interval))
         self.create_predefined_views()
 
     def create_admin_tasks(self):

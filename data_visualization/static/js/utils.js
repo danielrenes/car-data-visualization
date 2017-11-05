@@ -177,7 +177,7 @@ var json_to_html_table = function(data, message, modifiable, push_links, use_mar
         }
       } else {
         let value = obj[key];
-        if (value == null || value == "") {
+        if (value === null || value === "") {
           value = "n/a";
         }
         html.push("<td>" + value + "</td>");
