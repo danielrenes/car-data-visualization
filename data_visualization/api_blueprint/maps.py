@@ -27,7 +27,7 @@ def init_map():
     avg_latitude /= len(sensors)
     avg_longitude /= len(sensors)
     radius = max([avg_latitude - min_latitude, max_latitude - avg_latitude, avg_longitude - min_longitude, max_longitude - avg_longitude])
-    return jsonify({'center': {'latitude': avg_latitude, 'longitude': avg_longitude}, 'zoom': int(0.05 / radius)})
+    return jsonify({'center': {'latitude': avg_latitude, 'longitude': avg_longitude}, 'zoom': int(0.02 / radius)})
 
 @api.route('/maps/refresh', methods=['GET'])
 def refresh_map():

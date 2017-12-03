@@ -162,6 +162,7 @@ var load_subviews = function(view_idx) {
 
 var load_map = function() {
   map_last_index = 0;
+  heat = null;
 
   $.ajax({
     url: user_links["map_init"],
