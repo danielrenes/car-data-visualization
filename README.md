@@ -22,7 +22,7 @@ sudo apt-get install python-pip python-virtualenv build-essential python-dev lib
    
        export SECRET_KEY=secret
      
-       export DATABASE_URI=mysql://<username>:password>@<mysql server ip>/<database name>
+       export DATABASE_URI=mysql://<username>:<password>@<mysql server ip>/<database name>
      
        export CONFIG=development
      
