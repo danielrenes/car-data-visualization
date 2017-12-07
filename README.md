@@ -4,7 +4,7 @@
 
 python-pip, python-virtualenv, build-essential, python-dev, libmysqlclient-dev, mysql-server
 
-To install these packages run:
+<b>To install these packages run:</b>
 
 sudo apt-get install python-pip python-virtualenv build-essential python-dev libmysqlclient-dev mysql-server
 
@@ -20,19 +20,19 @@ sudo apt-get install python-pip python-virtualenv build-essential python-dev lib
      
    You can use the following configuration with a few modifications:
    
-     export SECRET_KEY=secret
+       export SECRET_KEY=secret
      
-     export DATABASE_URI=mysql://&lt;username&gt;:&lt;password&gt;@&lt;mysql server ip&gt;/&lt;database name&gt;
+       export DATABASE_URI=mysql://&lt;username&gt;:&lt;password&gt;@&lt;mysql server ip&gt;/&lt;database name&gt;
      
-     export CONFIG=development
+       export CONFIG=development
      
-     export FLASK_APP=app.py
+       export FLASK_APP=app.py
   
-  Please note, if you don't set the FLASK_APP environment variable to app.py than you can't use the flask command line interface.
+   Please note, if you don't set the <strong>FLASK_APP</strong> environment variable to <strong>app.py</strong> than you can't use the flask command line interface.
   
-5) Go back to the project root folder and run: source venv/bin/activate
+5) Go back to the project root folder and run: <strong>source venv/bin/activate</strong>
 
-If you issue the flask command you will get a list of commands that you can run.
+If you issue the <strong>flask</strong> command you will get a list of commands that you can run.
 
 To run the demo: <strong>flask demo</strong>
 
