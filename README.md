@@ -31,6 +31,7 @@ sudo apt-get install python-pip python-virtualenv build-essential python-dev lib
    Please note, if you don't set the <strong>FLASK_APP</strong> environment variable to <strong>app.py</strong> than you can't use the flask command line interface.
   
 5) Go back to the project root folder and run: <strong>source venv/bin/activate</strong>
+6) Install the required python packages: <strong>pip install -r requirements.txt</strong>
 
 If you issue the <strong>flask</strong> command you will get a list of commands that you can run.
 
